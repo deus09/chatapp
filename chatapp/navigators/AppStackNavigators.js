@@ -1,28 +1,28 @@
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
-import HomeScreen from '../screens/HomeScreen';
-import RegisterScreen from '../screens/RegisterScreen';
-import ChatScreen from '../screens/ChatScreen'
+import Login from '../screens/Login';
+import Register from '../screens/Register';
 import Addfriend from '../screens/Addfriend';
 import Success from '../screens/Success';
-import Try from '../screens/Try';
+import Home from '../screens/Home';
 import Chatforum from '../screens/Chatforum.js';
+import Friendlist from '../screens/Friendlist';
 
 const AppStack = createStackNavigator({
-    Home:{
-        screen:HomeScreen,
+    Login:{
+        screen:Login,
         navigationOptions:{
             headerShown: false
         }  
     },
     Register:{
-        screen: RegisterScreen,
+        screen: Register,
         navigationOptions:{
             headerShown: false
         }
     },
-    Chat: {
-        screen: Try,
+    Home: {
+        screen: Home,
         navigationOptions:{
             headerShown: false
         }
@@ -33,12 +33,24 @@ const AppStack = createStackNavigator({
             headerShown: false
         }  
     },
+    Success:{
+        screen:Success,
+        navigationOptions:{
+            headerShown: false
+        }  
+    },
     Chatforum:{
         screen:Chatforum,
         navigationOptions:{
             headerShown: false
         }  
     },
+    Friendlist: {
+        screen: Friendlist,
+        navigationOptions: {
+            headerShown: false
+        }
+    }
 })
 
 const AppStackNavigator = createAppContainer(AppStack);

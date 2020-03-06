@@ -1,6 +1,10 @@
 import React from 'react';
-import {View, Text, TextInput, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, YellowBox} from 'react-native';
 import io from 'socket.io-client';
+
+YellowBox.ignoreWarnings([
+    'Unrecognized WebSocket connection option(s) `agent`, `perMessageDeflate`, `pfx`, `key`, `passphrase`, `cert`, `ca`, `ciphers`, `rejectUnauthorized`. Did you mean to put these under `headers`?'
+  ])
 
 export default class Chatforum extends React.Component {
     constructor(props){
@@ -29,6 +33,10 @@ export default class Chatforum extends React.Component {
     ));
         return (
             <View style={styles.container}>
+                <ScrollView>
+                {chatMessages}
+                </ScrollView>
+                <KeyboardAvoidingView behavior='padding'>
                 <TextInput 
                     placeholder='Type a message'
                     style={styles.input}
@@ -40,7 +48,7 @@ export default class Chatforum extends React.Component {
                 <TouchableOpacity style={styles.btn} onPress={this.sendmessage}>
                     <Text style={{alignSelf: 'center'}}>send</Text>
                 </TouchableOpacity>
-                {chatMessages}
+                </KeyboardAvoidingView>
             </View>
         );
     }
@@ -50,7 +58,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
     },
     input: {
         padding: 10,

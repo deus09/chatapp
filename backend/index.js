@@ -9,7 +9,6 @@ app.use(express.json());
 app.use('/users', usersRouter);
 
 io.on("connection", socket => {
-    console.log("Fuck yeah!!!!");
     socket.on("chat message",msg =>{
         console.log(msg);
         io.emit("chat message",msg);

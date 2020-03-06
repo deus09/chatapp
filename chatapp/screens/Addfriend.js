@@ -12,42 +12,28 @@ export default class Addfriend extends React.Component {
         this.loadCredentials();
     }
     
-      async loadCredentials() {
-          const friendlist = await AsyncStorage.getItem('friendlist');
-          const friend = JSON.parse(friendlist); 
-          const usernumber = await AsyncStorage.getItem('phonenumber');
-          this.setState({usernumber: usernumber});
-          this.setState({friendlists: friend});
-      }
+    async loadCredentials() {
+        const usernumber = await AsyncStorage.getItem('phonenumber');
+        this.setState({usernumber: usernumber});
+        const f = await AsyncStorage.getItem('friends');
+        const f1 = JSON.parse(f);
+        if(f1 === null)
+        {
+            this.setState({friends: []});
+        }
+        else
+        {
+            this.setState({friends: f1});  
+        }
+    }
 
     handleChange = key => val => {
         this.setState({ [key] : val})
     }
 
-    addfriend = () => {
-        alert(this.state.friends);
-        // fetch('http://10.23.0.245:3000/users/addfriend', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Accept' : 'application/json',
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify({
-        //             phonenumber: this.state.phonenumber,
-        //             usernumber: this.state.usernumber,
-        //         })
-        //     })
-        //     .then((response) => response.json())
-        //     .then((res) => {
-        //         if(res.success === true){
-        //             alert('Added successfully');
-        //         }
-        //         else{     
-        //             alert('Failed');
-        //         }
-        //     })
-        //     .done();
-        this.setState({friends: [...this.state.friends,this.state.phonenumber]});
+    addfriend = async () => {
+        this.setState({ friends: [...this.state.friends, this.state.phonenumber] });
+        await AsyncStorage.setItem('friends',JSON.stringify(this.state.friends));
     }
 
     submitform = () => {
@@ -83,14 +69,13 @@ export default class Addfriend extends React.Component {
     render(){
         return (
             <View style={styles.container}>
-                <Text>Dev Lathiya</Text>
                 <TextInput
                         placeholder = "Phone number"
                         style = {styles.input}
                         value={this.state.phonenumber}
                         onChangeText={this.handleChange('phonenumber')}
                 />
-                <TouchableOpacity onPress={this.addfriend}>
+                <TouchableOpacity onPress={this.submitform}>
                     <Text>Add Friend</Text>
                 </TouchableOpacity>
             </View>
