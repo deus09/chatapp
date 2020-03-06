@@ -5,8 +5,8 @@ import Register from '../screens/Register';
 import Addfriend from '../screens/Addfriend';
 import Success from '../screens/Success';
 import Home from '../screens/Home';
-import Chatforum from '../screens/Chatforum.js';
 import Friendlist from '../screens/Friendlist';
+import Chatscreen from '../screens/Chatscreen';
 
 const AppStack = createStackNavigator({
     Login:{
@@ -39,16 +39,16 @@ const AppStack = createStackNavigator({
             headerShown: false
         }  
     },
-    Chatforum:{
-        screen:Chatforum,
-        navigationOptions:{
-            headerShown: false
-        }  
-    },
     Friendlist: {
         screen: Friendlist,
         navigationOptions: {
             headerShown: false
+        }
+    },
+    Chat: {
+        screen: Chatscreen,
+        navigationOptions: {
+            headerShown: false,
         }
     }
 })

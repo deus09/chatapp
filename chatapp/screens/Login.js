@@ -22,7 +22,7 @@ export default class Login extends React.Component {
     }
 
     handleChange = key => val => {
-    this.setState({ [key] : val})
+        this.setState({ [key] : val})
     }
  
     submitForm = () => {

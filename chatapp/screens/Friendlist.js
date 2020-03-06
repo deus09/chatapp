@@ -23,9 +23,14 @@ export default class Friendlist extends React.Component {
         }
     }
 
+    async Chat(username){
+        await AsyncStorage.setItem('current',username);
+        this.props.navigation.navigate('Chat');
+    }
+
     render(){
         const friends = this.state.friends.map(friend => (
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => this.Chat(friend)}>
                 <Text key={friend}>{friend}</Text>
             </TouchableOpacity>
         ));

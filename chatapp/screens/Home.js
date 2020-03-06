@@ -28,9 +28,6 @@ export default class Home extends React.Component {
         <TouchableOpacity onPress={() => this.props.navigation.navigate('Addfriend')}>
           <Text>Add a friend</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => this.props.navigation.navigate('Chatforum')}>
-          <Text>Chat</Text>
-        </TouchableOpacity>
         <TouchableOpacity onPress={this.logout}>
           <Text> Sign out </Text>
         </TouchableOpacity>
@@ -46,3 +43,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   }
 })
+

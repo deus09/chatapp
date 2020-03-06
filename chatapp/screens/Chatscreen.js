@@ -1,10 +1,6 @@
 import React from 'react';
-import {View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, YellowBox} from 'react-native';
+import {View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, YellowBox, AsyncStorage} from 'react-native';
 import io from 'socket.io-client';
-
-YellowBox.ignoreWarnings([
-    'Unrecognized WebSocket connection option(s) `agent`, `perMessageDeflate`, `pfx`, `key`, `passphrase`, `cert`, `ca`, `ciphers`, `rejectUnauthorized`. Did you mean to put these under `headers`?'
-  ])
 
 export default class Chatforum extends React.Component {
     constructor(props){
@@ -12,18 +8,32 @@ export default class Chatforum extends React.Component {
         this.state = {
             chatMessage : '',
             chatMessages: [], 
+            sender: '',
+            receiver: '',
         }
+        this._details();
     }
 
     componentDidMount(){
         this.socket = io("http://10.23.0.245:3000");
-        this.socket.on("chat message",msg => {
-            this.setState({chatMessages: [...this.state.chatMessages,msg]});
-        })
+        // this.socket.on("chat message",msg => {
+        //     this.setState({chatMessages: [...this.state.chatMessages,msg]});
+        // })
+    }
+
+    async _details() {
+        const sender = await AsyncStorage.getItem('phonenumber');
+        this.setState({sender: sender});
+        const receiver = await AsyncStorage.getItem('current');
+        this.setState({receiver: receiver});
     }
 
     sendmessage = () => {
-        this.socket.emit("chat message",this.state.chatMessage);
+        this.socket.emit("send message",{
+            sender: this.state.sender,
+            receiver: this.state.receiver,
+            message: this.state.chatMessage,
+        });
         this.setState({ chatMessage: ''});
     }
 
