@@ -32,8 +32,15 @@ export default class Addfriend extends React.Component {
     }
 
     addfriend = async () => {
-        this.setState({ friends: [...this.state.friends, this.state.phonenumber] });
-        await AsyncStorage.setItem('friends',JSON.stringify(this.state.friends));
+        if(this.state.friends.includes(this.state.phonenumber) === true)
+        {
+            alert('Already a friend');
+        }
+        else
+        {
+            this.setState({ friends: [...this.state.friends, this.state.phonenumber] });
+            await AsyncStorage.setItem('friends',JSON.stringify(this.state.friends));
+        }
     }
 
     submitform = () => {

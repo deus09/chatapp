@@ -30,8 +30,8 @@ export default class Friendlist extends React.Component {
 
     render(){
         const friends = this.state.friends.map(friend => (
-            <TouchableOpacity onPress={() => this.Chat(friend)}>
-                <Text key={friend}>{friend}</Text>
+            <TouchableOpacity key={friend} onPress={() => this.Chat(friend)}>
+                <Text>{friend}</Text>
             </TouchableOpacity>
         ));
         return(

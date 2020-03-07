@@ -1,11 +1,12 @@
 import React from 'react';
-import {View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, YellowBox, AsyncStorage} from 'react-native';
+import {View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, AsyncStorage} from 'react-native';
 import io from 'socket.io-client';
 
 export default class Chatforum extends React.Component {
     constructor(props){
         super(props);
         this.state = {
+            id: 0,
             chatMessage : '',
             chatMessages: [], 
             sender: '',
@@ -14,11 +15,13 @@ export default class Chatforum extends React.Component {
         this._details();
     }
 
-    componentDidMount(){
+    async componentDidMount(){
         this.socket = io("http://10.23.0.245:3000");
-        // this.socket.on("chat message",msg => {
-        //     this.setState({chatMessages: [...this.state.chatMessages,msg]});
-        // })
+        this.socket.on("new message",data => {
+            this.state.id+=1;
+            this.setState({ chatMessages: [...this.state.chatMessages,{id: this.state.id, sender: data.sender, message: data.message}] });
+            await AsyncStorage.setItem(this.state.receiver + ' Messages',JSON.stringify(chatMessages));
+        });
     }
 
     async _details() {
@@ -26,20 +29,51 @@ export default class Chatforum extends React.Component {
         this.setState({sender: sender});
         const receiver = await AsyncStorage.getItem('current');
         this.setState({receiver: receiver});
+        this.socket.emit("user connected",this.state.sender);
+        this.state.id=1;
+        const temp = await AsyncStorage.getItem(this.state.receiver + ' Messages');
+        const Messages = JSON.parse(temp);
+        if(Messages === null)
+        {
+            this.setState({ chatMessages : []});
+        }
+        else
+        {
+            this.setState({ chatMessages: Messages});
+        }
     }
 
-    sendmessage = () => {
+    sendmessage = async () => {
         this.socket.emit("send message",{
             sender: this.state.sender,
             receiver: this.state.receiver,
             message: this.state.chatMessage,
         });
+        this.state.id+=1;
+        this.setState({ chatMessages: [...this.state.chatMessages,{id: this.state.id, sender: this.state.sender, message: this.state.chatMessage}] });
+        await AsyncStorage.setItem(this.state.receiver + ' Messages',JSON.stringify(chatMessages));
         this.setState({ chatMessage: ''});
+    }
+
+    getTextStyle(name1, name2) {
+        if(name1 === name2) 
+        {
+            return { alignSelf: 'flex-end' }
+        } 
+        else 
+        {
+            return { alignSelf: 'flex-start'}
+        }
     }
 
     render(){
     const chatMessages =this.state.chatMessages.map(chatMessage => (
-        <Text key={chatMessage}>{chatMessage}</Text>
+        <Text
+            key={chatMessage.id}
+            style={this.getTextStyle(this.state.sender,chatMessage.sender)}
+        >
+            {chatMessage.message}
+        </Text>
     ));
         return (
             <View style={styles.container}>
