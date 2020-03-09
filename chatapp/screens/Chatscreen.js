@@ -1,29 +1,33 @@
 import React from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, AsyncStorage } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, AsyncStorage, FlatList, ActivityIndicator } from 'react-native';
 import io from 'socket.io-client';
 
 export default class Chatforum extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            id: 0,
+            id: null,
             chatMessage: null,
             chatMessages: [],
             temp: [],
             sender: null,
             receiver: null,
             isReceiverOnline: null,
+            socket: null,
+            loading: null,
         }
         this._details();
     }
 
     componentDidMount() {
         this.socket = io("http://10.23.0.245:3000");
-        this.socket.on("new message", async data => {
-            this.state.id += 1;
-            this.setState({ chatMessages: [...this.state.chatMessages, { id: this.state.id, sender: data.sender, message: data.message }] });
-            await AsyncStorage.setItem(this.state.receiver + ' Messages', JSON.stringify(chatMessages));
-        });
+        // this.socket.on("new message", async data => {
+        //     const temp1 = [...this.state.chatMessages, { id: this.state.id, sender: data.sender, message: data.message }];
+        //     this.setState({ chatMessages: temp1 });
+        //     this.state.id += 1;
+        //     // this.setState({ chatMessages: [...this.state.chatMessages, { id: this.state.id, sender: data.sender, message: data.message }] });
+        //     // await AsyncStorage.setItem(this.state.receiver + ' Messages', JSON.stringify(this.state.chatMessages));
+        // });
     }
 
     async _details() {
@@ -31,41 +35,51 @@ export default class Chatforum extends React.Component {
         this.setState({ sender: sender });
         const receiver = await AsyncStorage.getItem('current');
         this.setState({ receiver: receiver });
-        const t = await AsyncStorage.getItem(this.state.receiver + " id");
-        this.socket.emit("user connected", this.state.sender);
-        if (t === null)
-        this.state.id = 1;
-        else
-            this.state.id = t;
-        const temp = await AsyncStorage.getItem(this.state.sender + " " + this.state.receiver + " Messages");
-        const Messages = JSON.parse(temp);
-        if (Messages === null) {
-            this.setState({ chatMessages: [] });
-        }
-        else {
-            this.setState({ chatMessages: Messages });
-        }
-        // fetch('http://10.23.0.245:3000/users/getmessages', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Accept': 'application/json',
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify({
-        //         sender: this.state.sender,
-        //         receiver: this.state.receiver,
-        //     })
-        // })
-        //     .then((response) => response.json())
-        //     .then((res) => {
-        //         if (res.success === true) {
-        //             this.setState({ temp: res.message });
-        //         }
-        //         else {
-        //             alert(res.message);
-        //         }
-        //     })
-        //     .done();
+        this.socket.emit("user connected", {
+            sender: this.state.sender,
+        });
+        this.isReceiverOnline();
+        this.setState({ loading: true });
+        // const t = await AsyncStorage.getItem(this.state.receiver + " id");
+        // if (t === null)
+        //     this.state.id = 1;
+        // else
+        //     this.state.id = t;
+        // const temp = await AsyncStorage.getItem(this.state.sender + " " + this.state.receiver + " Messages");
+        // const Messages = JSON.parse(temp);
+        // if (Messages === null) {
+        //     this.setState({ chatMessages: [] });
+        // }
+        // else {
+        //     this.setState({ chatMessages: Messages });
+        // }
+        fetch('http://10.23.0.245:3000/getmessages', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                sender: this.state.receiver,
+                receiver: this.state.sender,
+            })
+        })
+            .then((response) => response.json())
+            .then((res) => {
+                if (res.success === true) {
+                    this.setState({ temp: res.message, loading: false });
+                    this.state.temp.map((item) => {
+                        console.log(item);
+                        const temp = [...this.state.chatMessages, { id: this.state.id, sender: receiver, message: item.message }];
+                        this.setState({ chatMessages: temp });
+                        this.state.id += 1;
+                    })
+                }
+                else {
+                    alert(res.message);
+                }
+            })
+            .done();
     }
 
     isReceiverOnline = () => {
@@ -92,9 +106,9 @@ export default class Chatforum extends React.Component {
     }
 
     sendmessage = async () => {
-        this.isReceiverOnline();
         if (this.state.chatMessage === null) {
             alert("Invalid message");
+            return;
         }
         else if (this.state.isReceiverOnline === true) {
             this.socket.emit("send message", {
@@ -103,7 +117,7 @@ export default class Chatforum extends React.Component {
             });
         }
         else {
-            fetch('http://10.23.0.245:3000/users/savemessage', {
+            fetch('http://10.23.0.245:3000/savemessage', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -122,13 +136,12 @@ export default class Chatforum extends React.Component {
                     }
                 })
                 .done();
-            const temp = [...this.state.chatMessages, { id: this.state.id, sender: this.state.sender, message: this.state.chatMessage }];
-            this.setState({ chatMessages: temp });
-            this.state.id += 1;
-            await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));
-            await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " id", this.state.id.toString());
-            console.log(this.state.chatMessages);
         }
+        const temp = [...this.state.chatMessages, { id: this.state.id, sender: this.state.sender, message: this.state.chatMessage }];
+        this.setState({ chatMessages: temp });
+        this.state.id += 1;
+        // await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));
+        // await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " id", this.state.id.toString());
         this.setState({ chatMessage: null });
     }
 
@@ -141,7 +154,15 @@ export default class Chatforum extends React.Component {
         }
     }
 
+    renderItem = ({ item }) => {
+        const temp1 = [...this.state.chatMessages, { id: this.state.id, sender: this.state.receiver, message: item.message }];
+        this.setState({ chatMessages: temp1 });
+        this.state.id += 1;
+        console.log(item);
+    }
+
     render() {
+        console.log(this.state.chatMessages);
         const chatMessages = this.state.chatMessages.map(chatMessage => (
             <Text
                 key={chatMessage.id}
@@ -152,7 +173,7 @@ export default class Chatforum extends React.Component {
         ));
         return (
             <View style={styles.container}>
-                <ScrollView>
+                <ScrollView style={{ marginTop: '10%' }}>
                     {chatMessages}
                 </ScrollView>
                 <KeyboardAvoidingView behavior='padding'>

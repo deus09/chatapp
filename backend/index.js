@@ -3,8 +3,10 @@ const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io').listen(server);
 var mysql = require('mysql');
+var bodyparser = require('body-parser');
 const port = 3000;
 
+app.use(bodyparser.json());
 app.use(express.json());
 
 var connection = mysql.createConnection({
@@ -18,10 +20,12 @@ users = [];
 
 io.on("connection", function (socket) {
   console.log('Connected   ' + socket.id);
-  socket.on("user connected", function (username) {
-    users[username] = socket.id;
+  socket.on("user connected", function(data) {
+    users[data.sender] = socket.id;
+    console.log(data.sender);
   });
-  socket.on("send message", function (data) {
+  
+  socket.on("send message", data => {
     console.log(data);
     var socketId = users[data.receiver];
     console.log(data.receiver + " " + socketId);
@@ -149,13 +153,25 @@ app.post('/getmessages', function (req, res, next) {
         console.log(err);
         res.send({ success: false, message: 'Could not connect to database' });
       }
+      console.log(row);
       res.send({ success: true, message: row })
     });
 });
 
 app.post('/isReceiverOnline', function (req, res, next) {
   receiver = req.body.receiver;
-  // if(users.)
+  console.log(users);
+  console.log("Nkajdhasj " + receiver);
+  if(users[receiver] !== undefined)
+  {
+    res.send({success: true});
+    console.log("Hai");
+  }
+  else
+  {
+    res.send({success: false});
+    console.log("Nahi hai");
+  }
 });
 
 server.listen(port, () => console.log('server is running on port: ' + port));
