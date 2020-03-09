@@ -1,5 +1,6 @@
 import React from 'react';
 import { Text, AsyncStorage, TouchableOpacity, FlatList } from 'react-native';
+import io from 'socket.io-client';
 
 export default class Friendlist extends React.Component {
     constructor(props) {
@@ -9,13 +10,10 @@ export default class Friendlist extends React.Component {
             usernumber: null,
             friends: [],
             chatMessages: [],
-            temp : [],
+            temp: [],
+            socket: null,
         }
         this.loadCredentials();
-    }
-
-    componentDidMount() {
-        this.socket = io("http://10.23.0.245:3000");
     }
 
     async loadCredentials() {
@@ -50,9 +48,9 @@ export default class Friendlist extends React.Component {
         this.props.navigation.navigate('Chat');
     }
 
-    renderItem = async ({ item }) => {
+    updateMessages = async (friend) => {
         const newMessages = 0;
-        const temp = await AsyncStorage.getItem(this.state.usernumber + " " + item.friend + " Messages");
+        const temp = await AsyncStorage.getItem(this.state.usernumber + " " + friend + " Messages");
         const Messages = JSON.parse(temp);
         if (Messages === null) {
             this.setState({ chatMessages: [] });
@@ -60,7 +58,7 @@ export default class Friendlist extends React.Component {
         else {
             this.setState({ chatMessages: Messages });
         }
-        const t = await AsyncStorage.getItem(this.state.usernumber + " " + item.friend + " id");
+        const t = await AsyncStorage.getItem(this.state.usernumber + " " + friend + " id");
         if (t === null)
             this.state.id = 1;
         else
@@ -72,7 +70,7 @@ export default class Friendlist extends React.Component {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                sender: item.friend,
+                sender: friend,
                 receiver: this.state.usernumber,
             })
         })
@@ -81,7 +79,7 @@ export default class Friendlist extends React.Component {
                 if (res.success === true) {
                     this.setState({ temp: res.message });
                     this.state.temp.map(async (data) => {
-                        const temp = [...this.state.chatMessages, { id: this.state.id, sender: item.friend, message: data.message }];
+                        const temp = [...this.state.chatMessages, { id: this.state.id, sender: friend, message: data.message }];
                         this.setState({ chatMessages: temp });
                         this.state.id += 1;
                         await AsyncStorage.setItem(this.state.usernumber + " " + this.state.receiver + " Messages", JSON.stringify(temp));
@@ -100,7 +98,7 @@ export default class Friendlist extends React.Component {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                sender: item.friend,
+                sender: friend,
                 receiver: this.state.usernumber,
             })
         })
@@ -111,11 +109,15 @@ export default class Friendlist extends React.Component {
                 }
             })
             .done();
+    }
+
+    renderItem = ({ item }) => {
+        // this.updateMessages(item.friend);
         return (
             <TouchableOpacity style={{ marginTop: '10%', alignSelf: 'center' }} onPress={() => this.enterChat(item.friend)}>
                 <Text>{item.friend}</Text>
             </TouchableOpacity>
-        )
+        );
     }
 
     render() {

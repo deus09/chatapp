@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, AsyncStorage } from 'react-native';
 import io from 'socket.io-client';
 
-export default class Chatforum extends React.Component {
+export default class ChatScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -40,7 +40,7 @@ export default class Chatforum extends React.Component {
         this.isReceiverOnline();
         const t = await AsyncStorage.getItem(this.state.sender + " " + this.state.receiver + " id");
         if (t === null)
-        this.state.id = 1;
+            this.state.id = 1;
         else
             this.state.id = t;
         const temp = await AsyncStorage.getItem(this.state.sender + " " + this.state.receiver + " Messages");
@@ -51,53 +51,52 @@ export default class Chatforum extends React.Component {
         else {
             this.setState({ chatMessages: Messages });
         }
-        fetch('http://10.23.0.245:3000/getmessages', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                sender: this.state.receiver,
-                receiver: this.state.sender,
-            })
-        })
-            .then((response) => response.json())
-            .then((res) => {
-                if (res.success === true) {
-                    this.setState({ temp: res.message });
-                    this.state.temp.map(async (item) => {
-                        const temp = [...this.state.chatMessages, { id: this.state.id, sender: receiver, message: item.message }];
-                        this.setState({ chatMessages: temp });
-                        this.state.id += 1;
-                        await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));
-                        await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " id", this.state.id.toString());
-                    })
-                }
-                else {
-                    alert(res.message);
-                }
-            })
-            .done();
-        fetch('http://10.23.0.245:3000/deletemessages', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                sender: this.state.receiver,
-                receiver: this.state.sender,
-            })
-        })
-            .then((response) => response.json())
-            .then((res) => {
-                if(res.success === false)
-                {
-                    alert(res.message);
-                }
-            })
-            .done();
+        // fetch('http://10.23.0.245:3000/getmessages', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Accept': 'application/json',
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({
+        //         sender: this.state.receiver,
+        //         receiver: this.state.sender,
+        //     })
+        // })
+        //     .then((response) => response.json())
+        //     .then((res) => {
+        //         if (res.success === true) {
+        //             this.setState({ temp: res.message });
+        //             this.state.temp.map(async (item) => {
+        //                 const temp = [...this.state.chatMessages, { id: this.state.id, sender: receiver, message: item.message }];
+        //                 this.setState({ chatMessages: temp });
+        //                 this.state.id += 1;
+        //                 await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));
+        //                 await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " id", this.state.id.toString());
+        //             })
+        //         }
+        //         else {
+        //             alert(res.message);
+        //         }
+        //     })
+        //     .done();
+        // fetch('http://10.23.0.245:3000/deletemessages', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Accept': 'application/json',
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({
+        //         sender: this.state.receiver,
+        //         receiver: this.state.sender,
+        //     })
+        // })
+        //     .then((response) => response.json())
+        //     .then((res) => {
+        //         if (res.success === false) {
+        //             alert(res.message);
+        //         }
+        //     })
+        //     .done();
     }
 
     isReceiverOnline = () => {
