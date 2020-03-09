@@ -19,16 +19,12 @@ var connection = mysql.createConnection({
 users = [];
 
 io.on("connection", function (socket) {
-  console.log('Connected   ' + socket.id);
   socket.on("user connected", function(data) {
     users[data.sender] = socket.id;
-    console.log(data.sender);
   });
   
   socket.on("send message", data => {
-    console.log(data);
     var socketId = users[data.receiver];
-    console.log(data.receiver + " " + socketId);
     io.to(socketId).emit("new message", data);
   });
 })
@@ -131,9 +127,6 @@ app.post('/getfriends', function (req, res, next) {
 });
 
 app.post('/savemessage', function (req, res, next) {
-  console.log(req.body.sender);
-  console.log(req.body.receiver);
-  console.log(req.body.message);
   var sql = "INSERT INTO messages VALUES('" + req.body.sender + "','" + req.body.receiver + "','" + req.body.message + "')";
   connection.query(sql, function (err) {
     if (err) {
@@ -153,24 +146,32 @@ app.post('/getmessages', function (req, res, next) {
         console.log(err);
         res.send({ success: false, message: 'Could not connect to database' });
       }
-      console.log(row);
       res.send({ success: true, message: row })
+    });
+});
+
+app.post('/deletemessages', function (req, res, next) {
+  sender = req.body.sender;
+  receiver = req.body.receiver;
+  connection.query(
+    "DELETE FROM messages WHERE sender = " + sender + " AND receiver = " + receiver, function (err, row, field) {
+      if (err) {
+        console.log(err);
+        res.send({ success: false, message: 'Could not connect to database' });
+      }
+      res.send({success: true});
     });
 });
 
 app.post('/isReceiverOnline', function (req, res, next) {
   receiver = req.body.receiver;
-  console.log(users);
-  console.log("Nkajdhasj " + receiver);
   if(users[receiver] !== undefined)
   {
     res.send({success: true});
-    console.log("Hai");
   }
   else
   {
     res.send({success: false});
-    console.log("Nahi hai");
   }
 });
 
