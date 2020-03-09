@@ -1,35 +1,32 @@
 import React from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, AsyncStorage} from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, AsyncStorage } from 'react-native';
 
 export default class Login extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {
-            phonenumber : '',
-            password: '',
+            phonenumber: null,
+            password: null,
         }
-    }
- 
-    componentDidMount(){
-        this._loadInitialState().done();
+        this._loadInitialState();
     }
 
     _loadInitialState = async () => {
         var value = await AsyncStorage.getItem('phonenumber');
-        if( value !== null){
-            this.props.navigation.navigate('Chat');
+        if (value !== null) {
+            this.props.navigation.navigate('Home');
         }
     }
 
     handleChange = key => val => {
-        this.setState({ [key] : val})
+        this.setState({ [key]: val })
     }
- 
+
     submitForm = () => {
-        fetch('http://10.23.0.245:3000/users/login', {
+        fetch('http://10.23.0.245:3000/login', {
             method: 'POST',
             headers: {
-                'Accept' : 'application/json',
+                'Accept': 'application/json',
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
@@ -37,41 +34,41 @@ export default class Login extends React.Component {
                 password: this.state.password,
             })
         })
-        .then((response) => response.json())
-        .then((res) => {
-            if(res.success === true){
-                AsyncStorage.setItem('phonenumber',res.phonenumber);
-                this.props.navigation.navigate('Home');
-            }
-            else{     
-                alert(res.message);
-            }
-        })
-        .done();
+            .then((response) => response.json())
+            .then(async (res) => {
+                if (res.success === true) {
+                    await AsyncStorage.setItem('phonenumber', res.phonenumber);
+                    this.props.navigation.navigate('Home');
+                }
+                else {
+                    alert(res.message);
+                }
+            })
+            .done();
     }
-    render(){
-        return(
+    render() {
+        return (
             <View style={styles.container}>
                 <View style={styles.top}>
-                    <Text style={styles.text}>Chat App</Text> 
+                    <Text style={styles.text}>Chat App</Text>
                 </View>
                 <View style={styles.middle}>
-                    <TextInput 
+                    <TextInput
                         placeholder='Phone Number'
-                        keyboardType= 'number-pad'
+                        keyboardType='number-pad'
                         style={styles.input}
                         value={this.state.phonenumber}
                         onChangeText={this.handleChange('phonenumber')}
                     />
                     <TextInput
-                        placeholder = "Password"
+                        placeholder="Password"
                         secureTextEntry
-                        style = {styles.input}
+                        style={styles.input}
                         value={this.state.password}
                         onChangeText={this.handleChange('password')}
                     />
                     <TouchableOpacity style={styles.submitbtn} onPress={this.submitForm}>
-                        <Text style={{alignSelf: 'center'}}>Login</Text>
+                        <Text style={{ alignSelf: 'center' }}>Login</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.bottom}>
@@ -84,10 +81,10 @@ export default class Login extends React.Component {
                         }}
                     />
                     <View>
-                    <Text style={{alignSelf: 'center'}}>Don't have an account?</Text>
-                    <TouchableOpacity style={styles.btn} onPress={() => this.props.navigation.navigate('Register')}>
-                    <Text style={{alignSelf: 'center'}}>Create account</Text>
-                    </TouchableOpacity>
+                        <Text style={{ alignSelf: 'center' }}>Don't have an account?</Text>
+                        <TouchableOpacity style={styles.btn} onPress={() => this.props.navigation.navigate('Register')}>
+                            <Text style={{ alignSelf: 'center' }}>Create account</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </View>
@@ -101,7 +98,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'space-between',
     },
-    top:{
+    top: {
         marginTop: '20%',
     },
     bottom: {

@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 
 export default class Success extends React.Component {
-    render(){
+    render() {
         return (
             <View style={styles.container}>
                 <Text>Account created successfully</Text>

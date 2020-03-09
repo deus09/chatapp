@@ -1,86 +1,111 @@
 import React from 'react';
-import {Text, View, StyleSheet, TextInput, TouchableOpacity, AsyncStorage } from 'react-native';
+import { Text, View, StyleSheet, TextInput, TouchableOpacity, AsyncStorage } from 'react-native';
 
 export default class Addfriend extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {
-            phonenumber: '',
-            usernumber: '',
+            phonenumber: null,
+            usernumber: null,
             friends: [],
         }
         this.loadCredentials();
     }
-    
+
     async loadCredentials() {
         const usernumber = await AsyncStorage.getItem('phonenumber');
-        this.setState({usernumber: usernumber});
-        const f = await AsyncStorage.getItem('friends');
-        const f1 = JSON.parse(f);
-        if(f1 === null)
-        {
-            this.setState({friends: []});
-        }
-        else
-        {
-            this.setState({friends: f1});  
-        }
+        this.setState({ usernumber: usernumber });
     }
 
     handleChange = key => val => {
-        this.setState({ [key] : val})
+        this.setState({ [key]: val })
     }
 
-    addfriend = async () => {
-        if(this.state.friends.includes(this.state.phonenumber) === true)
-        {
-            alert('Already a friend');
-        }
-        else
-        {
-            this.setState({ friends: [...this.state.friends, this.state.phonenumber] });
-            await AsyncStorage.setItem('friends',JSON.stringify(this.state.friends));
-        }
+    addfriend = () => {
+        fetch('http://10.23.0.245:3000/addfriend', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                usernumber: this.state.usernumber,
+                phonenumber: this.state.phonenumber,
+            })
+        })
+            .then((response) => response.json())
+            .then((res) => {
+                if (res.success === true) {
+                    alert('Successfully added!');
+                }
+                else {
+                    alert(res.message);
+                }
+            })
+            .done();
+    }
+
+    checkforfriend = async () => {
+        fetch('http://10.23.0.245:3000/alreadyfriend', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                usernumber: this.state.usernumber,
+                phonenumber: this.state.phonenumber,
+            })
+        })
+            .then((response) => response.json())
+            .then((res) => {
+                if (res.success === true) {
+                    this.addfriend();
+                }
+                else {
+                    alert(res.message);
+                }
+            })
+            .done();
     }
 
     submitform = () => {
-        if(this.state.phonenumber.length < 10 || this.state.phonenumber === this.state.usernumber)
-        {
+        if (this.state.Phonenumber !== null || this.state.phonenumber.length < 10 || this.state.phonenumber === this.state.usernumber) {
             alert('Enter a valid number');
         }
-        else
-        {
-            fetch('http://10.23.0.245:3000/users/checkforexistinguser', {
+        else {
+            fetch('http://10.23.0.245:3000/checkforexistinguser', {
                 method: 'POST',
                 headers: {
-                    'Accept' : 'application/json',
+                    'Accept': 'application/json',
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     Phonenumber: this.state.phonenumber,
                 })
             })
-            .then((response) => response.json())
-            .then((res) => {
-                if(res.success === false){
-                    this.addfriend();
-                }
-                else{     
-                    alert('User does not exists');
-                }
-            })
-            .done();
+                .then((response) => response.json())
+                .then((res) => {
+                    if (res.success === false) {
+                        this.checkforfriend();
+                    }
+                    else {
+                        alert('User does not exists');
+                    }
+                })
+                .done();
         }
     }
 
-    render(){
+    render() {
         return (
             <View style={styles.container}>
                 <TextInput
-                        placeholder = "Phone number"
-                        style = {styles.input}
-                        value={this.state.phonenumber}
-                        onChangeText={this.handleChange('phonenumber')}
+                    placeholder="Phone number"
+                    keyboardType="number-pad"
+                    style={styles.input}
+                    value={this.state.phonenumber}
+                    onChangeText={this.handleChange('phonenumber')}
                 />
                 <TouchableOpacity onPress={this.submitform}>
                     <Text>Add Friend</Text>

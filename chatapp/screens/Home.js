@@ -4,20 +4,22 @@ import { StyleSheet, Text, View, TouchableOpacity, AsyncStorage } from 'react-na
 export default class Home extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {phonenumber: null};
+    this.state = {
+      phonenumber: null
+    };
     this.loadCredentials();
   }
 
   async loadCredentials() {
-      const phonenumber = await AsyncStorage.getItem('phonenumber');
-      this.setState({phonenumber: phonenumber});
+    const phonenumber = await AsyncStorage.getItem('phonenumber');
+    this.setState({ phonenumber: phonenumber });
   }
 
   logout = async () => {
     await AsyncStorage.removeItem('phonenumber');
     this.props.navigation.navigate('Login');
   }
-  
+
   render() {
     return (
       <View style={styles.container}>
