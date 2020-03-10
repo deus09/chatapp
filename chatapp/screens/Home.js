@@ -5,16 +5,31 @@ export default class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      id: null,
       phonenumber: null,
       friends: [],
+      chatMessages: [],
+      newCount: [],
     };
     this.loadCredentials();
   }
 
-  async loadCredentials() {
-    const phonenumber = await AsyncStorage.getItem('phonenumber');
-    this.setState({ phonenumber: phonenumber });
-    fetch('http://10.23.0.245:3000/getfriends', {
+  getmessages() {
+    return fetch('http://10.23.0.245:3000/getmessages', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        receiver: this.state.phonenumber,
+      })
+    })
+      .then((response) => response.json())
+  }
+
+  getfriends() {
+    return fetch('http://10.23.0.245:3000/getfriends', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -25,18 +40,63 @@ export default class Home extends React.Component {
       })
     })
       .then((response) => response.json())
-      .then((res) => {
-        if (res.success === true) {
-          this.setState({
-            friends: res.friend,
-          })
+  }
+
+  getdata() {
+    return Promise.all([this.getmessages(), this.getfriends()]);
+  }
+
+  async getchatMessagesandId(item) {
+    const temp = await AsyncStorage.getItem(this.state.phonenumber + " " + item.sender + " Messages");
+    const Messages = JSON.parse(temp);
+    if (Messages === null) {
+      this.setState({ chatMessages: [] });
+    }
+    else {
+      this.setState({ chatMessages: Messages });
+    }
+    const t = await AsyncStorage.getItem(this.state.phonenumber + " " + item.sender + " id");
+    if (t === null)
+      this.state.id = 1;
+    else
+      this.state.id = t;
+  }
+
+  async loadCredentials() {
+    const phonenumber = await AsyncStorage.getItem('phonenumber');
+    this.setState({ phonenumber: phonenumber, id: 0 });
+    this.getdata()
+      .then(([messages, friends]) => {
+        console.log(messages, friends);
+        if (messages.success === false || friends.success === false) {
+          alert("Could not connect to database");
         }
         else {
-          alert(res.message);
+          messages.message.map((item) => {
+            this.getchatMessagesandId(item);
+            const temporary = [...this.state.chatMessages, { id: this.state.id, sender: item.sender, message: item.message }];
+            this.state.id += 1;
+            this.setState({ friends: temporary });
+            if (this.state.newCount[item.sender] === undefined) {
+              this.state.newCount[item.sender] = 1;
+            }
+            else {
+              this.state.newCount[item.sender] += 1;
+            }
+          })
+          const temp = friends.friend;
+          this.state.id = 1;
+          temp.map((item) => {
+            var count = 0;
+            if (this.state.newCount[item.friend] !== undefined) {
+              count = this.state.newCount[item.friend];
+            }
+            const temporary = [...this.state.friends, { id: this.state.id, newMessages: count, friend: item.friend }];
+            this.state.id += 1;
+            this.setState({ friends: temporary });
+          })
         }
       })
-      .done();
-      
   }
 
   logout = async () => {
@@ -53,6 +113,7 @@ export default class Home extends React.Component {
     return (
       <TouchableOpacity style={{ marginTop: '10%', alignSelf: 'center' }} onPress={() => this.enterChat(item.friend)}>
         <Text>{item.friend}</Text>
+        <Text>{item.newMessages}</Text>
       </TouchableOpacity>
     );
   }
@@ -60,7 +121,7 @@ export default class Home extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text>{this.state.phonenumber}</Text>
+        <Text style={{ marginTop: '10%' }}>{this.state.phonenumber}</Text>
         <FlatList
           data={this.state.friends}
           renderItem={this.renderItem}

@@ -144,8 +144,8 @@ app.post('/getmessages', function (req, res, next) {
   sender = req.body.sender;
   receiver = req.body.receiver;
   connection.query(
-    "SELECT * FROM messages WHERE sender = ? AND receiver = ?",
-    [sender,receiver], function (err, row, field) {
+    "SELECT * FROM messages WHERE receiver = ?",
+    [receiver], function (err, row, field) {
       if (err) {
         console.log(err);
         res.send({ success: false, message: 'Could not connect to database' });
