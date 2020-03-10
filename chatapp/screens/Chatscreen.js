@@ -24,8 +24,14 @@ export default class ChatScreen extends React.Component {
             const temp1 = [...this.state.chatMessages, { id: this.state.id, sender: data.sender, message: data.message }];
             this.setState({ chatMessages: temp1 });
             this.state.id += 1;
-            await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp1));
-            await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " id", this.state.id.toString());
+            // await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp1));
+            // await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " id", this.state.id.toString());
+        });
+    }
+
+    componentWillUnmount(){
+        this.socket.emit("Disconnect",{
+            sender: this.state.sender,
         });
     }
 
@@ -38,65 +44,67 @@ export default class ChatScreen extends React.Component {
             sender: this.state.sender,
         });
         this.isReceiverOnline();
-        const t = await AsyncStorage.getItem(this.state.sender + " " + this.state.receiver + " id");
-        if (t === null)
+        // const t = await AsyncStorage.getItem(this.state.sender + " " + this.state.receiver + " id");
+        // if (t === null)
             this.state.id = 1;
-        else
-            this.state.id = t;
-        const temp = await AsyncStorage.getItem(this.state.sender + " " + this.state.receiver + " Messages");
-        const Messages = JSON.parse(temp);
-        if (Messages === null) {
-            this.setState({ chatMessages: [] });
-        }
-        else {
-            this.setState({ chatMessages: Messages });
-        }
-        fetch('http://10.23.0.245:3000/getmessages', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                sender: this.state.receiver,
-                receiver: this.state.sender,
-            })
-        })
-            .then((response) => response.json())
-            .then((res) => {
-                if (res.success === true) {
-                    this.setState({ temp: res.message });
-                    this.state.temp.map(async (item) => {
-                        const temp = [...this.state.chatMessages, { id: this.state.id, sender: receiver, message: item.message }];
-                        this.setState({ chatMessages: temp });
-                        this.state.id += 1;
-                        await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));
-                        await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " id", this.state.id.toString());
-                    })
-                }
-                else {
-                    alert(res.message);
-                }
-            })
-            .done();
-        fetch('http://10.23.0.245:3000/deletemessages', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                sender: this.state.receiver,
-                receiver: this.state.sender,
-            })
-        })
-            .then((response) => response.json())
-            .then((res) => {
-                if (res.success === false) {
-                    alert(res.message);
-                }
-            })
-            .done();
+        // else
+        //     this.state.id = t;
+        // const temp = await AsyncStorage.getItem(this.state.sender + " " + this.state.receiver + " Messages");
+        // const Messages = JSON.parse(temp);
+        // if (Messages === null) {
+        //     this.setState({ chatMessages: [] });
+        // }
+        // else {
+        //     this.setState({ chatMessages: Messages });
+        // }
+        // fetch('http://10.23.0.245:3000/getmessages', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Accept': 'application/json',
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({
+        //         sender: this.state.receiver,
+        //         receiver: this.state.sender,
+        //     })
+        // })
+        //     .then((response) => response.json())
+        //     .then((res) => {
+        //         if (res.success === true) {
+        //             this.setState({ temp: res.message });
+        //             this.state.temp.map(async (item) => {
+        //                 const temp = [...this.state.chatMessages, { id: this.state.id, sender: receiver, message: item.message }];
+        //                 this.setState({ chatMessages: temp });
+        //                 this.state.id += 1;
+        //                 await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));
+        //                 await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " id", this.state.id.toString());
+        //             })
+        //         }
+        //         else {
+        //             console.log("Get messages");
+        //             alert(res.message);
+        //         }
+        //     })
+        //     .done();
+        // fetch('http://10.23.0.245:3000/deletemessages', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Accept': 'application/json',
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({
+        //         sender: this.state.receiver,
+        //         receiver: this.state.sender,
+        //     })
+        // })
+        //     .then((response) => response.json())
+        //     .then((res) => {
+        //         if (res.success === false) {
+        //             console.log("Delete messages");
+        //             alert(res.message);
+        //         }
+        //     })
+        //     .done();
     }
 
     isReceiverOnline = () => {
@@ -157,8 +165,8 @@ export default class ChatScreen extends React.Component {
         const temp = [...this.state.chatMessages, { id: this.state.id, sender: this.state.sender, message: this.state.chatMessage }];
         this.setState({ chatMessages: temp });
         this.state.id += 1;
-        await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));
-        await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " id", this.state.id.toString());
+        // await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));
+        // await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " id", this.state.id.toString());
         this.setState({ chatMessage: null });
     }
 

@@ -47,7 +47,7 @@ export default class Register extends React.Component {
         if (this.state.password !== this.state.confirmPassword) {
             alert('Passwords do not match');
         }
-        else if (this.state.firstname < 1 || this.state.lastname < 1 || this.state.Phonenumber !== null || this.state.Phonenumber.length < 10) {
+        else if (this.state.firstname < 1 || this.state.lastname < 1 || this.state.Phonenumber === null || this.state.Phonenumber.length < 10) {
             alert('Details are not valid');
         }
         else {

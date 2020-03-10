@@ -70,7 +70,7 @@ export default class Addfriend extends React.Component {
     }
 
     submitform = () => {
-        if (this.state.Phonenumber !== null || this.state.phonenumber.length < 10 || this.state.phonenumber === this.state.usernumber) {
+        if (this.state.Phonenumber === null || this.state.phonenumber.length < 10 || this.state.phonenumber === this.state.usernumber) {
             alert('Enter a valid number');
         }
         else {
