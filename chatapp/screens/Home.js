@@ -1,11 +1,12 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, AsyncStorage } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, AsyncStorage, FlatList } from 'react-native';
 
 export default class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      phonenumber: null
+      phonenumber: null,
+      friends: [],
     };
     this.loadCredentials();
   }
@@ -13,6 +14,28 @@ export default class Home extends React.Component {
   async loadCredentials() {
     const phonenumber = await AsyncStorage.getItem('phonenumber');
     this.setState({ phonenumber: phonenumber });
+    fetch('http://10.23.0.245:3000/getfriends', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        usernumber: this.state.phonenumber,
+      })
+    })
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.success === true) {
+          this.setState({
+            friends: res.friend,
+          })
+        }
+        else {
+          alert(res.message);
+        }
+      })
+      .done();
   }
 
   logout = async () => {
@@ -20,13 +43,28 @@ export default class Home extends React.Component {
     this.props.navigation.navigate('Login');
   }
 
+  enterChat = async (username) => {
+    await AsyncStorage.setItem('current', username);
+    this.props.navigation.navigate('Chat');
+  }
+
+  renderItem = ({ item }) => {
+    return (
+      <TouchableOpacity style={{ marginTop: '10%', alignSelf: 'center' }} onPress={() => this.enterChat(item.friend)}>
+        <Text>{item.friend}</Text>
+      </TouchableOpacity>
+    );
+  }
+
   render() {
     return (
       <View style={styles.container}>
         <Text>{this.state.phonenumber}</Text>
-        <TouchableOpacity onPress={() => this.props.navigation.navigate('Friendlist')}>
-          <Text>List of friends</Text>
-        </TouchableOpacity>
+        <FlatList
+          data={this.state.friends}
+          renderItem={this.renderItem}
+          keyExtractor={(item, index) => index.toString()}
+        />
         <TouchableOpacity onPress={() => this.props.navigation.navigate('Addfriend')}>
           <Text>Add a friend</Text>
         </TouchableOpacity>

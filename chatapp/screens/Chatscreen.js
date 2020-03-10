@@ -51,52 +51,52 @@ export default class ChatScreen extends React.Component {
         else {
             this.setState({ chatMessages: Messages });
         }
-        // fetch('http://10.23.0.245:3000/getmessages', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Accept': 'application/json',
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify({
-        //         sender: this.state.receiver,
-        //         receiver: this.state.sender,
-        //     })
-        // })
-        //     .then((response) => response.json())
-        //     .then((res) => {
-        //         if (res.success === true) {
-        //             this.setState({ temp: res.message });
-        //             this.state.temp.map(async (item) => {
-        //                 const temp = [...this.state.chatMessages, { id: this.state.id, sender: receiver, message: item.message }];
-        //                 this.setState({ chatMessages: temp });
-        //                 this.state.id += 1;
-        //                 await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));
-        //                 await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " id", this.state.id.toString());
-        //             })
-        //         }
-        //         else {
-        //             alert(res.message);
-        //         }
-        //     })
-        //     .done();
-        // fetch('http://10.23.0.245:3000/deletemessages', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Accept': 'application/json',
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify({
-        //         sender: this.state.receiver,
-        //         receiver: this.state.sender,
-        //     })
-        // })
-        //     .then((response) => response.json())
-        //     .then((res) => {
-        //         if (res.success === false) {
-        //             alert(res.message);
-        //         }
-        //     })
-        //     .done();
+        fetch('http://10.23.0.245:3000/getmessages', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                sender: this.state.receiver,
+                receiver: this.state.sender,
+            })
+        })
+            .then((response) => response.json())
+            .then((res) => {
+                if (res.success === true) {
+                    this.setState({ temp: res.message });
+                    this.state.temp.map(async (item) => {
+                        const temp = [...this.state.chatMessages, { id: this.state.id, sender: receiver, message: item.message }];
+                        this.setState({ chatMessages: temp });
+                        this.state.id += 1;
+                        await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));
+                        await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " id", this.state.id.toString());
+                    })
+                }
+                else {
+                    alert(res.message);
+                }
+            })
+            .done();
+        fetch('http://10.23.0.245:3000/deletemessages', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                sender: this.state.receiver,
+                receiver: this.state.sender,
+            })
+        })
+            .then((response) => response.json())
+            .then((res) => {
+                if (res.success === false) {
+                    alert(res.message);
+                }
+            })
+            .done();
     }
 
     isReceiverOnline = () => {

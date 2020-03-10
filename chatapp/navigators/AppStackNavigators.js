@@ -5,7 +5,6 @@ import Register from '../screens/Register';
 import Addfriend from '../screens/Addfriend';
 import Success from '../screens/Success';
 import Home from '../screens/Home';
-import Friendlist from '../screens/Friendlist';
 import Chatscreen from '../screens/Chatscreen';
 
 const AppStack = createStackNavigator(
@@ -36,12 +35,6 @@ const AppStack = createStackNavigator(
         },
         Success: {
             screen: Success,
-            navigationOptions: {
-                headerShown: false
-            }
-        },
-        Friendlist: {
-            screen: Friendlist,
             navigationOptions: {
                 headerShown: false
             }
