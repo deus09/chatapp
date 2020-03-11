@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, AsyncStorage, FlatList, Image } from 'react-native';
-import { Ionicons, AntDesign } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 
 export default class Home extends React.Component {
   constructor(props) {
@@ -69,22 +69,20 @@ export default class Home extends React.Component {
   async loadCredentials() {
     const phonenumber = await AsyncStorage.getItem('phonenumber');
     this.setState({ phonenumber: phonenumber });
-    console.log(this.state.phonenumber);
     this.getdata()
       .then(([messages, friends]) => {
-        console.log(messages);
-        console.log(friends);
         if (messages.success === false || friends.success === false) {
           alert("Could not connect to database");
         }
         else {
           messages.message.map(async (item) => {
-            const temp = await AsyncStorage.getItem(this.state.phonenumber + " " + item.sender + " Messages");
-            const Messages = JSON.parse(temp);
-            console.log(item.sender);
-            const temporary = [...Messages, {sender: item.sender, message: item.message }];
+            var temp = await AsyncStorage.getItem(this.state.phonenumber + " " + item.sender + " Messages");
+            var Messages = JSON.parse(temp);
+            console.log(Messages);
+            var temporary = [...Messages, {sender: item.sender, message: item.message }];
+            console.log(item);
+            console.log(temporary);
             await AsyncStorage.setItem(this.state.phonenumber + " " + item.sender + " Messages", JSON.stringify(temporary));
-            console.log(item.message);
           })
           friends.friend.map((item) => {
             var count = 0, lastmessage = "No new messages";
@@ -101,8 +99,9 @@ export default class Home extends React.Component {
     this.props.navigation.navigate('Login');
   }
 
-  enterChat = async (username) => {
-    await AsyncStorage.setItem('current', username);
+  enterChat = async (usernumber, name) => {
+    await AsyncStorage.setItem('currentnumber', usernumber);
+    await AsyncStorage.setItem('currentname', name);
     this.props.navigation.navigate('Chat');
   }
 
@@ -111,14 +110,14 @@ export default class Home extends React.Component {
       <View style={styles.names}>
         <TouchableOpacity
           style={styles.user}
-          onPress={() => this.enterChat(item.friend)}
+          onPress={() => this.enterChat(item.friend,item.name)}
         >
           <Text style={{ fontSize: 20, marginLeft: '3%', fontWeight: 'bold' }}>{item.name}</Text>
-          <Text style={{ fontSize: 20, marginRight: '4%' }}>{item.newMessages}</Text>
+          {/* <Text style={{ fontSize: 20, marginRight: '4%' }}>{item.newMessages}</Text> */}
         </TouchableOpacity>
         <View style={{ flexDirection: 'row' }}>
-          <AntDesign style={{ marginLeft: '2.5%' }} name="caretright" size={12} color="black" />
-          <Text style={{ fontSize: 12 }}>    {item.last}</Text>
+          {/* <AntDesign style={{ marginLeft: '2.5%' }} name="caretright" size={12} color="black" /> */}
+          {/* <Text style={{ fontSize: 12 }}>    {item.last}</Text> */}
         </View>
         <View
           style={{
