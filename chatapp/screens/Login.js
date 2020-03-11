@@ -68,7 +68,7 @@ export default class Login extends React.Component {
                         onChangeText={this.handleChange('password')}
                     />
                     <TouchableOpacity style={styles.submitbtn} onPress={this.submitForm}>
-                        <Text style={{ alignSelf: 'center' }}>Login</Text>
+                        <Text style={{ alignSelf: 'center', padding: '4%' }}>Login</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.bottom}>
@@ -80,10 +80,11 @@ export default class Login extends React.Component {
                             alignSelf: 'center',
                         }}
                     />
-                    <View>
-                        <Text style={{ alignSelf: 'center' }}>Don't have an account?</Text>
-                        <TouchableOpacity style={styles.btn} onPress={() => this.props.navigation.navigate('Register')}>
-                            <Text style={{ alignSelf: 'center' }}>Create account</Text>
+                    <View style={{alignItems: 'center'}}>
+                        <Text>Don't have an account?</Text>
+                        <Text style={{height: '1%'}}></Text>
+                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Register')}>
+                            <Text style={{color: 'grey'}}>Create account</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

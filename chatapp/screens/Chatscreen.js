@@ -1,12 +1,11 @@
 import React from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, AsyncStorage } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, FlatList, KeyboardAvoidingView, AsyncStorage } from 'react-native';
 import io from 'socket.io-client';
 
 export default class ChatScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            id: null,
             chatMessage: null,
             chatMessages: [],
             temp: [],
@@ -21,18 +20,38 @@ export default class ChatScreen extends React.Component {
     componentDidMount() {
         this.socket = io("http://10.23.0.245:3000");
         this.socket.on("new message", async data => {
-            const temp1 = [...this.state.chatMessages, { id: this.state.id, sender: data.sender, message: data.message }];
+            const temp1 = [...this.state.chatMessages, {sender: data.sender, message: data.message }];
             this.setState({ chatMessages: temp1 });
-            this.state.id += 1;
-            // await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp1));
-            // await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " id", this.state.id.toString());
+            await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp1));
         });
     }
 
-    componentWillUnmount(){
-        this.socket.emit("Disconnect",{
+    handleChange = key => val => {
+        this.setState({ [key]: val })
+    }
+
+    componentWillUnmount() {
+        this.socket.emit("Disconnect", {
             sender: this.state.sender,
         });
+    }
+
+    isReceiverOnline = () => {
+        return fetch('http://10.23.0.245:3000/isReceiverOnline', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                receiver: this.state.receiver,
+            })
+        })
+            .then((response) => response.json())
+    }
+
+    getInformation = () => {
+        return Promise.all([this.isReceiverOnline()]);
     }
 
     async _details() {
@@ -44,129 +63,57 @@ export default class ChatScreen extends React.Component {
             sender: this.state.sender,
         });
         this.isReceiverOnline();
-        // const t = await AsyncStorage.getItem(this.state.sender + " " + this.state.receiver + " id");
-        // if (t === null)
-            this.state.id = 1;
-        // else
-        //     this.state.id = t;
-        // const temp = await AsyncStorage.getItem(this.state.sender + " " + this.state.receiver + " Messages");
-        // const Messages = JSON.parse(temp);
-        // if (Messages === null) {
-        //     this.setState({ chatMessages: [] });
-        // }
-        // else {
-        //     this.setState({ chatMessages: Messages });
-        // }
-        // fetch('http://10.23.0.245:3000/getmessages', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Accept': 'application/json',
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify({
-        //         sender: this.state.receiver,
-        //         receiver: this.state.sender,
-        //     })
-        // })
-        //     .then((response) => response.json())
-        //     .then((res) => {
-        //         if (res.success === true) {
-        //             this.setState({ temp: res.message });
-        //             this.state.temp.map(async (item) => {
-        //                 const temp = [...this.state.chatMessages, { id: this.state.id, sender: receiver, message: item.message }];
-        //                 this.setState({ chatMessages: temp });
-        //                 this.state.id += 1;
-        //                 await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));
-        //                 await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " id", this.state.id.toString());
-        //             })
-        //         }
-        //         else {
-        //             console.log("Get messages");
-        //             alert(res.message);
-        //         }
-        //     })
-        //     .done();
-        // fetch('http://10.23.0.245:3000/deletemessages', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Accept': 'application/json',
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify({
-        //         sender: this.state.receiver,
-        //         receiver: this.state.sender,
-        //     })
-        // })
-        //     .then((response) => response.json())
-        //     .then((res) => {
-        //         if (res.success === false) {
-        //             console.log("Delete messages");
-        //             alert(res.message);
-        //         }
-        //     })
-        //     .done();
-    }
-
-    isReceiverOnline = () => {
-        fetch('http://10.23.0.245:3000/isReceiverOnline', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                receiver: this.state.receiver,
-            })
-        })
-            .then((response) => response.json())
-            .then((res) => {
-                if (res.success === true) {
-                    this.state.isReceiverOnline = true;
-                }
-                else {
-                    this.state.isReceiverOnline = false;
-                }
-            })
-            .done();
+        const temp = await AsyncStorage.getItem(this.state.sender + " " + this.state.receiver + " Messages");
+        const Messages = JSON.parse(temp);
+        if (Messages === null) {
+            this.setState({ chatMessages: [] });
+        }
+        else {
+            this.setState({ chatMessages: Messages });
+        }
     }
 
     sendmessage = async () => {
+        console.log(this.state.chatMessage);
         if (this.state.chatMessage === null) {
             alert("Invalid message");
             return;
         }
-        else if (this.state.isReceiverOnline === true) {
-            this.socket.emit("send message", {
-                receiver: this.state.receiver,
-                message: this.state.chatMessage,
-            });
-        }
         else {
-            fetch('http://10.23.0.245:3000/savemessage', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    sender: this.state.sender,
-                    receiver: this.state.receiver,
-                    message: this.state.chatMessage,
-                })
-            })
-                .then((response) => response.json())
-                .then((res) => {
-                    if (res.success === false) {
-                        alert(res.message);
+            this.getInformation()
+                .then(([res]) => {
+                    if (res.success === true) {
+                        this.socket.emit("send message", {
+                            receiver: this.state.receiver,
+                            message: this.state.chatMessage,
+                        });
+                    }
+                    else {
+                        fetch('http://10.23.0.245:3000/savemessage', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                sender: this.state.sender,
+                                receiver: this.state.receiver,
+                                message: this.state.chatMessage,
+                            })
+                        })
+                            .then((response) => response.json())
+                            .then((res) => {
+                                if (res.success === false) {
+                                    alert(res.message);
+                                }
+                            })
+                            .done();
                     }
                 })
-                .done();
         }
-        const temp = [...this.state.chatMessages, { id: this.state.id, sender: this.state.sender, message: this.state.chatMessage }];
+        const temp = [...this.state.chatMessages, {sender: this.state.sender, message: this.state.chatMessage }];
         this.setState({ chatMessages: temp });
-        this.state.id += 1;
-        // await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));
-        // await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " id", this.state.id.toString());
+        await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));
         this.setState({ chatMessage: null });
     }
 
@@ -179,28 +126,26 @@ export default class ChatScreen extends React.Component {
         }
     }
 
+    renderItem = ({ item }) => {
+        return (
+            <Text style={this.getTextStyle(this.state.sender,item.sender)}>{item.message}</Text>
+        );
+      }
+
     render() {
-        const chatMessages = this.state.chatMessages.map(chatMessage => (
-            <Text
-                key={chatMessage.id}
-                style={this.getTextStyle(this.state.sender, chatMessage.sender)}
-            >
-                {chatMessage.message}
-            </Text>
-        ));
         return (
             <View style={styles.container}>
-                <ScrollView style={{ marginTop: '10%' }}>
-                    {chatMessages}
-                </ScrollView>
+                <FlatList
+                    data={this.state.chatMessages}
+                    renderItem={this.renderItem}
+                    keyExtractor={(item, index) => index.toString()}
+                />
                 <KeyboardAvoidingView behavior='padding'>
                     <TextInput
-                        placeholder='Type a message'
+                        placeholder='Type a message...'
                         style={styles.input}
                         value={this.state.chatMessage}
-                        onChangeText={chatMessage => {
-                            this.setState({ chatMessage });
-                        }}
+                        onChangeText={this.handleChange('chatMessage')}
                     />
                     <TouchableOpacity style={styles.btn} onPress={this.sendmessage}>
                         <Text style={{ alignSelf: 'center' }}>send</Text>

@@ -1,15 +1,15 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, AsyncStorage, FlatList } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, AsyncStorage, FlatList, Image } from 'react-native';
+import { Ionicons, AntDesign } from '@expo/vector-icons';
 
 export default class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      id: null,
       phonenumber: null,
       friends: [],
-      chatMessages: [],
       newCount: [],
+      latestMessage: [],
     };
     this.loadCredentials();
   }
@@ -42,60 +42,54 @@ export default class Home extends React.Component {
       .then((response) => response.json())
   }
 
+  deletemessages() {
+    return fetch('http://10.23.0.245:3000/deletemessages', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        receiver: this.state.phonenumber,
+      })
+    })
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.success === false) {
+          alert(res.message);
+        }
+      })
+      .done();
+  }
+
   getdata() {
     return Promise.all([this.getmessages(), this.getfriends()]);
   }
 
-  async getchatMessagesandId(item) {
-    const temp = await AsyncStorage.getItem(this.state.phonenumber + " " + item.sender + " Messages");
-    const Messages = JSON.parse(temp);
-    if (Messages === null) {
-      this.setState({ chatMessages: [] });
-    }
-    else {
-      this.setState({ chatMessages: Messages });
-    }
-    const t = await AsyncStorage.getItem(this.state.phonenumber + " " + item.sender + " id");
-    if (t === null)
-      this.state.id = 1;
-    else
-      this.state.id = t;
-  }
-
   async loadCredentials() {
     const phonenumber = await AsyncStorage.getItem('phonenumber');
-    this.setState({ phonenumber: phonenumber, id: 0 });
+    this.setState({ phonenumber: phonenumber });
     this.getdata()
       .then(([messages, friends]) => {
         if (messages.success === false || friends.success === false) {
           alert("Could not connect to database");
         }
         else {
-          messages.message.map((item) => {
-            this.getchatMessagesandId(item);
-            const temporary = [...this.state.chatMessages, { id: this.state.id, sender: item.sender, message: item.messaage }];
-            this.state.id += 1;
-            this.setState({ chatMessages: temporary });
-            if (this.state.newCount[item.sender] === undefined) {
-              this.state.newCount[item.sender] = 1;
-            }
-            else {
-              this.state.newCount[item.sender] += 1;
-            }
+          messages.message.map(async (item) => {
+            const temp = await AsyncStorage.getItem(this.state.phonenumber + " " + item.sender + " Messages");
+            const Messages = JSON.parse(temp);
+            const temporary = [...this.state.chatMessages, {sender: item.sender, message: item.message }];
+            await AsyncStorage.setItem(this.state.phonenumber + " " + item.sender + " Messages", JSON.stringify(temporary));
+            console.log(item.message);
           })
-          const temp = friends.friend;
-          this.state.id = 1;
-          temp.map((item) => {
-            var count = 0;
-            if (this.state.newCount[item.friend] !== undefined) {
-              count = this.state.newCount[item.friend];
-            }
-            const temporary = [...this.state.friends, { id: this.state.id, newMessages: count, friend: item.friend }];
-            this.state.id += 1;
+          friends.friend.map((item) => {
+            var count = 0, lastmessage = "No new messages";
+            const temporary = [...this.state.friends, { newMessages: count, friend: item.friend , name: item.name , last: lastmessage }];
             this.setState({ friends: temporary });
           })
         }
       })
+    this.deletemessages();
   }
 
   logout = async () => {
@@ -110,27 +104,24 @@ export default class Home extends React.Component {
 
   renderItem = ({ item }) => {
     return (
-      <View>
-        <View
-          style={{
-            borderBottomColor: 'black',
-            borderBottomWidth: 1,
-            width: '90%',
-            alignSelf: 'center',
-          }}
-        />
+      <View style={styles.names}>
         <TouchableOpacity
-          style={{ marginTop: '10%', alignSelf: 'center' }}
+          style={styles.user}
           onPress={() => this.enterChat(item.friend)}
         >
-          <Text>{item.friend}</Text>
-          <Text>{item.newMessages}</Text>
+          <Text style={{ fontSize: 20, marginLeft: '3%', fontWeight: 'bold' }}>{item.name}</Text>
+          <Text style={{ fontSize: 20, marginRight: '4%' }}>{item.newMessages}</Text>
         </TouchableOpacity>
+        <View style={{ flexDirection: 'row' }}>
+          <AntDesign style={{ marginLeft: '2.5%' }} name="caretright" size={12} color="black" />
+          <Text style={{ fontSize: 12 }}>    {item.last}</Text>
+        </View>
         <View
           style={{
-            borderBottomColor: 'black',
+            marginTop: '1%',
+            borderBottomColor: '#ccc',
             borderBottomWidth: 1,
-            width: '90%',
+            width: '100%',
             alignSelf: 'center',
           }}
         />
@@ -141,18 +132,37 @@ export default class Home extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text style={{ marginTop: '10%' }}>{this.state.phonenumber}</Text>
+        <View style={styles.headingcontainer}>
+          <View style={styles.heading}>
+            <TouchableOpacity onPress={() => this.props.navigation.navigate('Addfriend')}>
+              <Image
+                style={{ width: 30, height: 30 }}
+                source={require('../assets/addfriend.png')}
+              />
+            </TouchableOpacity>
+            <Text style={{ fontSize: 23, fontWeight: 'bold' }}>Chat App</Text>
+            <TouchableOpacity onPress={this.logout}>
+              <Image
+                style={{ width: 30, height: 30 }}
+                source={require('../assets/logout.png')}
+              />
+            </TouchableOpacity>
+          </View>
+          <View
+            style={{
+              borderBottomColor: 'black',
+              borderBottomWidth: 1,
+              width: '100%',
+              alignSelf: 'center',
+            }}
+          />
+        </View>
         <FlatList
+          style={styles.headingcontainer}
           data={this.state.friends}
           renderItem={this.renderItem}
           keyExtractor={(item, index) => index.toString()}
         />
-        <TouchableOpacity onPress={() => this.props.navigation.navigate('Addfriend')}>
-          <Text>Add a friend</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={this.logout}>
-          <Text> Sign out </Text>
-        </TouchableOpacity>
       </View>
     );
   }
@@ -163,5 +173,18 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: 'center',
-  }
+  },
+  headingcontainer: {
+    width: '100%',
+  },
+  heading: {
+    padding: '2%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: '6.7%',
+  },
+  user: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
 });

@@ -107,7 +107,8 @@ app.post('/alreadyfriend', function (req, res, next) {
 app.post('/addfriend', function (req, res, next) {
   var phonenumber = req.body.phonenumber;
   var usernumber = req.body.usernumber;
-  var sql = "INSERT INTO friends VALUES('" + usernumber + "','" + phonenumber + "')";
+  var name = req.body.name;
+  var sql = "INSERT INTO friends VALUES('" + usernumber + "','" + name + "','" + phonenumber + "')";
   connection.query(sql, function (err) {
     if (err) {
       console.log(err);
@@ -120,7 +121,7 @@ app.post('/addfriend', function (req, res, next) {
 app.post('/getfriends', function (req, res, next) {
   var user = req.body.usernumber;
   connection.query(
-    "SELECT friend FROM friends WHERE user = " + user, function (err, row, field) {
+    "SELECT * FROM friends WHERE user = " + user, function (err, row, field) {
       if (err) {
         console.log(err);
         res.send({ success: false, message: 'Could not connect to database' });
@@ -155,10 +156,10 @@ app.post('/getmessages', function (req, res, next) {
 });
 
 app.post('/deletemessages', function (req, res, next) {
-  sender = req.body.sender;
   receiver = req.body.receiver;
   connection.query(
-    "DELETE FROM messages WHERE sender = " + sender + " AND receiver = " + receiver, function (err, row, field) {
+    "DELETE FROM messages WHERE receiver = ?",
+    [receiver], function (err, row, field) {
       if (err) {
         console.log(err);
         res.send({ success: false, message: 'Could not connect to database' });
@@ -169,6 +170,7 @@ app.post('/deletemessages', function (req, res, next) {
 
 app.post('/isReceiverOnline', function (req, res, next) {
   receiver = req.body.receiver;
+  console.log(users);
   if(users[receiver] !== undefined)
   {
     res.send({success: true});

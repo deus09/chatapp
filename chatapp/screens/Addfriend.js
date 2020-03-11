@@ -5,6 +5,7 @@ export default class Addfriend extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            name: null,
             phonenumber: null,
             usernumber: null,
             friends: [],
@@ -29,6 +30,7 @@ export default class Addfriend extends React.Component {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+                name: this.state.name,
                 usernumber: this.state.usernumber,
                 phonenumber: this.state.phonenumber,
             })
@@ -37,6 +39,7 @@ export default class Addfriend extends React.Component {
             .then((res) => {
                 if (res.success === true) {
                     alert('Successfully added!');
+                    this.props.navigation.navigate('Home');
                 }
                 else {
                     alert(res.message);
@@ -90,7 +93,7 @@ export default class Addfriend extends React.Component {
                         this.checkforfriend();
                     }
                     else {
-                        alert('User does not exists');
+                        alert('User does not exist');
                     }
                 })
                 .done();
@@ -101,13 +104,19 @@ export default class Addfriend extends React.Component {
         return (
             <View style={styles.container}>
                 <TextInput
+                    placeholder="Name"
+                    style={styles.input}
+                    value={this.state.name}
+                    onChangeText={this.handleChange('name')}
+                />
+                <TextInput
                     placeholder="Phone number"
                     keyboardType="number-pad"
                     style={styles.input}
                     value={this.state.phonenumber}
                     onChangeText={this.handleChange('phonenumber')}
                 />
-                <TouchableOpacity onPress={this.submitform}>
+                <TouchableOpacity style={styles.btn} onPress={this.submitform}>
                     <Text>Add Friend</Text>
                 </TouchableOpacity>
             </View>
@@ -130,4 +139,9 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
     },
+    btn: {
+        padding: '1%',
+        borderWidth: 1,
+        borderRadius: 5,
+    }
 })
