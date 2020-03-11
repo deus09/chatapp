@@ -8,8 +8,7 @@ export default class Home extends React.Component {
     this.state = {
       phonenumber: null,
       friends: [],
-      newCount: [],
-      latestMessage: [],
+      chatMessages: [],
     };
     this.loadCredentials();
   }
@@ -66,6 +65,15 @@ export default class Home extends React.Component {
     return Promise.all([this.getmessages(), this.getfriends()]);
   }
 
+  async getchatMessagesandId(item) {
+    console.log("Fuck ya bitch");
+    var temp = await AsyncStorage.getItem(this.state.phonenumber + " " + item.sender + " Messages");
+    var Messages = JSON.parse(temp);
+    if (Messages !== null) {
+      this.setState({chatMessages: Messages});
+    }
+  }
+
   async loadCredentials() {
     const phonenumber = await AsyncStorage.getItem('phonenumber');
     this.setState({ phonenumber: phonenumber });
@@ -76,23 +84,16 @@ export default class Home extends React.Component {
         }
         else {
           messages.message.map(async (item) => {
-            var temp = await AsyncStorage.getItem(this.state.phonenumber + " " + item.sender + " Messages");
-            var Messages = JSON.parse(temp);
-            var chatMessages = [];
-            if(Messages !== null)
-            {
-              chatMessages = Messages;
-            }
-            // console.log(chatMessages);
-            var temporary = [...chatMessages, {sender: item.sender, message: item.message }];
-            console.log("New");
+            this.getchatMessagesandId(item);
+            var temporary = [...this.state.chatMessages, { sender: item.sender, message: item.message }];
+            console.log(this.state.chatMessages);
+            console.log("Hey");
             console.log(temporary);
-            console.log("Close");
             await AsyncStorage.setItem(this.state.phonenumber + " " + item.sender + " Messages", JSON.stringify(temporary));
           })
           friends.friend.map((item) => {
             var count = 0, lastmessage = "No new messages";
-            const temporary = [...this.state.friends, { newMessages: count, friend: item.friend , name: item.name , last: lastmessage }];
+            const temporary = [...this.state.friends, { newMessages: count, friend: item.friend, name: item.name, last: lastmessage }];
             this.setState({ friends: temporary });
           })
         }
@@ -116,7 +117,7 @@ export default class Home extends React.Component {
       <View style={styles.names}>
         <TouchableOpacity
           style={styles.user}
-          onPress={() => this.enterChat(item.friend,item.name)}
+          onPress={() => this.enterChat(item.friend, item.name)}
         >
           <Text style={{ fontSize: 20, marginLeft: '3%', fontWeight: 'bold' }}>{item.name}</Text>
           {/* <Text style={{ fontSize: 20, marginRight: '4%' }}>{item.newMessages}</Text> */}
