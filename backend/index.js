@@ -19,13 +19,13 @@ var connection = mysql.createConnection({
 users = [];
 
 io.on("connection", function (socket) {
-  socket.on("user connected", function(data) {
+  socket.on("user_connected", function(data) {
     users[data.sender] = socket.id;
   });
   
-  socket.on("send message", data => {
+  socket.on("send_message", function(data) {
     var socketId = users[data.receiver];
-    io.to(socketId).emit("new message", data);
+    io.to(socketId).emit("new_message", data);
   });
   socket.on("Disconnect",function(data){
     delete users[data.sender];

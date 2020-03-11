@@ -78,10 +78,16 @@ export default class Home extends React.Component {
           messages.message.map(async (item) => {
             var temp = await AsyncStorage.getItem(this.state.phonenumber + " " + item.sender + " Messages");
             var Messages = JSON.parse(temp);
-            console.log(Messages);
-            var temporary = [...Messages, {sender: item.sender, message: item.message }];
-            console.log(item);
+            var chatMessages = [];
+            if(Messages !== null)
+            {
+              chatMessages = Messages;
+            }
+            // console.log(chatMessages);
+            var temporary = [...chatMessages, {sender: item.sender, message: item.message }];
+            console.log("New");
             console.log(temporary);
+            console.log("Close");
             await AsyncStorage.setItem(this.state.phonenumber + " " + item.sender + " Messages", JSON.stringify(temporary));
           })
           friends.friend.map((item) => {

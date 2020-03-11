@@ -20,7 +20,8 @@ export default class ChatScreen extends React.Component {
 
     componentDidMount() {
         this.socket = io("http://10.23.0.245:3000");
-        this.socket.on("new message", async data => {
+        this.socket.on("new_message", async data => {
+            console.log(data.message);
             const temp1 = [...this.state.chatMessages, { sender: data.sender, message: data.message }];
             this.setState({ chatMessages: temp1 });
             await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp1));
@@ -62,7 +63,7 @@ export default class ChatScreen extends React.Component {
         this.setState({ receiver: receiver });
         const receivername = await AsyncStorage.getItem('currentname');
         this.setState({ receivername: receivername });
-        this.socket.emit("user connected", {
+        this.socket.emit("user_connected", {
             sender: this.state.sender,
         });
         this.isReceiverOnline();
@@ -77,8 +78,8 @@ export default class ChatScreen extends React.Component {
     }
 
     sendmessage = async () => {
-        console.log(this.state.chatMessage);
-        if (this.state.chatMessage === null) {
+        var chatMessage = this.state.chatMessage;
+        if (chatMessage === null) {
             alert("Invalid message");
             return;
         }
@@ -86,9 +87,9 @@ export default class ChatScreen extends React.Component {
             this.getInformation()
                 .then(([res]) => {
                     if (res.success === true) {
-                        this.socket.emit("send message", {
+                        this.socket.emit("send_message", {
                             receiver: this.state.receiver,
-                            message: this.state.chatMessage,
+                            message: chatMessage,
                         });
                     }
                     else {
@@ -101,7 +102,7 @@ export default class ChatScreen extends React.Component {
                             body: JSON.stringify({
                                 sender: this.state.sender,
                                 receiver: this.state.receiver,
-                                message: this.state.chatMessage,
+                                message: chatMessage,
                             })
                         })
                             .then((response) => response.json())
@@ -114,7 +115,7 @@ export default class ChatScreen extends React.Component {
                     }
                 })
         }
-        const temp = [...this.state.chatMessages, { sender: this.state.sender, message: this.state.chatMessage }];
+        const temp = [...this.state.chatMessages, { sender: this.state.sender, message: chatMessage }];
         this.setState({ chatMessages: temp });
         await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));
         this.setState({ chatMessage: null });
