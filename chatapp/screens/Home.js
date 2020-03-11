@@ -67,16 +67,15 @@ export default class Home extends React.Component {
     this.setState({ phonenumber: phonenumber, id: 0 });
     this.getdata()
       .then(([messages, friends]) => {
-        console.log(messages, friends);
         if (messages.success === false || friends.success === false) {
           alert("Could not connect to database");
         }
         else {
           messages.message.map((item) => {
             this.getchatMessagesandId(item);
-            const temporary = [...this.state.chatMessages, { id: this.state.id, sender: item.sender, message: item.message }];
+            const temporary = [...this.state.chatMessages, { id: this.state.id, sender: item.sender, message: item.messaage }];
             this.state.id += 1;
-            this.setState({ friends: temporary });
+            this.setState({ chatMessages: temporary });
             if (this.state.newCount[item.sender] === undefined) {
               this.state.newCount[item.sender] = 1;
             }
@@ -111,10 +110,31 @@ export default class Home extends React.Component {
 
   renderItem = ({ item }) => {
     return (
-      <TouchableOpacity style={{ marginTop: '10%', alignSelf: 'center' }} onPress={() => this.enterChat(item.friend)}>
-        <Text>{item.friend}</Text>
-        <Text>{item.newMessages}</Text>
-      </TouchableOpacity>
+      <View>
+        <View
+          style={{
+            borderBottomColor: 'black',
+            borderBottomWidth: 1,
+            width: '90%',
+            alignSelf: 'center',
+          }}
+        />
+        <TouchableOpacity
+          style={{ marginTop: '10%', alignSelf: 'center' }}
+          onPress={() => this.enterChat(item.friend)}
+        >
+          <Text>{item.friend}</Text>
+          <Text>{item.newMessages}</Text>
+        </TouchableOpacity>
+        <View
+          style={{
+            borderBottomColor: 'black',
+            borderBottomWidth: 1,
+            width: '90%',
+            alignSelf: 'center',
+          }}
+        />
+      </View>
     );
   }
 

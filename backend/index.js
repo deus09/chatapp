@@ -150,7 +150,7 @@ app.post('/getmessages', function (req, res, next) {
         console.log(err);
         res.send({ success: false, message: 'Could not connect to database' });
       }
-      res.send({ success: true, message: row })
+      res.send({ success: true, message: row });
     });
 });
 
