@@ -170,7 +170,6 @@ app.post('/deletemessages', function (req, res, next) {
 
 app.post('/isReceiverOnline', function (req, res, next) {
   receiver = req.body.receiver;
-  console.log(users);
   if(users[receiver] !== undefined)
   {
     res.send({success: true});

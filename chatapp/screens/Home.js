@@ -69,8 +69,11 @@ export default class Home extends React.Component {
   async loadCredentials() {
     const phonenumber = await AsyncStorage.getItem('phonenumber');
     this.setState({ phonenumber: phonenumber });
+    console.log(this.state.phonenumber);
     this.getdata()
       .then(([messages, friends]) => {
+        console.log(messages);
+        console.log(friends);
         if (messages.success === false || friends.success === false) {
           alert("Could not connect to database");
         }
@@ -78,7 +81,8 @@ export default class Home extends React.Component {
           messages.message.map(async (item) => {
             const temp = await AsyncStorage.getItem(this.state.phonenumber + " " + item.sender + " Messages");
             const Messages = JSON.parse(temp);
-            const temporary = [...this.state.chatMessages, {sender: item.sender, message: item.message }];
+            console.log(item.sender);
+            const temporary = [...Messages, {sender: item.sender, message: item.message }];
             await AsyncStorage.setItem(this.state.phonenumber + " " + item.sender + " Messages", JSON.stringify(temporary));
             console.log(item.message);
           })
