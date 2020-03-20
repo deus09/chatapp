@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, FlatList, KeyboardAvoidingView, AsyncStorage } from 'react-native';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import io from 'socket.io-client';
 
 export default class ChatScreen extends React.Component {
@@ -19,9 +19,8 @@ export default class ChatScreen extends React.Component {
     }
 
     componentDidMount() {
-        this.socket = io("http://10.23.0.245:3000");
+        this.socket = io("http://192.168.43.101:3000");
         this.socket.on("new_message", async data => {
-            console.log(data.message);
             const temp1 = [...this.state.chatMessages, { sender: data.sender, message: data.message }];
             this.setState({ chatMessages: temp1 });
             await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp1));
@@ -39,7 +38,7 @@ export default class ChatScreen extends React.Component {
     }
 
     isReceiverOnline = () => {
-        return fetch('http://10.23.0.245:3000/isReceiverOnline', {
+        return fetch('http://192.168.43.101:3000/isReceiverOnline', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -66,7 +65,6 @@ export default class ChatScreen extends React.Component {
         this.socket.emit("user_connected", {
             sender: this.state.sender,
         });
-        this.isReceiverOnline();
         const temp = await AsyncStorage.getItem(this.state.sender + " " + this.state.receiver + " Messages");
         const Messages = JSON.parse(temp);
         if (Messages === null) {
@@ -75,6 +73,72 @@ export default class ChatScreen extends React.Component {
         else {
             this.setState({ chatMessages: Messages });
         }
+        fetch('http://192.168.43.101:3000/getmessages', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                sender: this.state.receiver,
+                receiver: this.state.sender,
+            })
+        })
+            .then((response) => response.json())
+            .then((res) => {
+                if (res.success === true) {
+                    this.setState({ temp: res.message });
+                    this.state.temp.map(async (item) => {
+                        const temp = [...this.state.chatMessages, { sender: receiver, message: item.message }];
+                        this.setState({ chatMessages: temp });
+                        await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));
+                    })
+                }
+                else {
+                    alert(res.message);
+                }
+            })
+            .done();
+        fetch('http://192.168.43.101:3000/deletemessages', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                sender: this.state.receiver,
+                receiver: this.state.sender,
+            })
+        })
+            .then((response) => response.json())
+            .then((res) => {
+                if (res.success === false) {
+                    alert(res.message);
+                }
+            })
+            .done();
+    }
+
+    permenentStorage = (Currnetmessage) => {
+        fetch('http://192.168.43.101:3000/permenentStorage', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                sender: this.state.receiver,
+                receiver: this.state.sender,
+                message: Currnetmessage,
+            })
+        })
+            .then((response) => response.json())
+            .then((res) => {
+                if (res.success === false) {
+                    alert(res.message);
+                }
+            })
+            .done();
     }
 
     sendmessage = async () => {
@@ -93,7 +157,7 @@ export default class ChatScreen extends React.Component {
                         });
                     }
                     else {
-                        fetch('http://10.23.0.245:3000/savemessage', {
+                        fetch('http://192.168.43.101:3000/savemessage', {
                             method: 'POST',
                             headers: {
                                 'Accept': 'application/json',
@@ -115,6 +179,7 @@ export default class ChatScreen extends React.Component {
                     }
                 })
         }
+        this.permenentStorage(chatMessage);
         const temp = [...this.state.chatMessages, { sender: this.state.sender, message: chatMessage }];
         this.setState({ chatMessages: temp });
         await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));

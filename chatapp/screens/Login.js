@@ -23,7 +23,7 @@ export default class Login extends React.Component {
     }
 
     submitForm = () => {
-        fetch('http://10.23.0.245:3000/login', {
+        fetch('http://192.168.43.101:3000/login', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',

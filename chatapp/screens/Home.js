@@ -13,22 +13,70 @@ export default class Home extends React.Component {
     this.loadCredentials();
   }
 
-  getmessages() {
-    return fetch('http://10.23.0.245:3000/getmessages', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        receiver: this.state.phonenumber,
-      })
-    })
-      .then((response) => response.json())
+  // getmessages() {
+  //   return fetch('http://192.168.43.101:3000/getmessages', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Accept': 'application/json',
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify({
+  //       receiver: this.state.phonenumber,
+  //     })
+  //   })
+  //     .then((response) => response.json())
+  // }
+
+  // getfriends() {
+  //   return fetch('http://192.168.43.101:3000/getfriends', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Accept': 'application/json',
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify({
+  //       usernumber: this.state.phonenumber,
+  //     })
+  //   })
+  //     .then((response) => response.json())
+  // }
+
+  // deletemessages() {
+  //   return fetch('http://192.168.43.101:3000/deletemessages', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Accept': 'application/json',
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify({
+  //       receiver: this.state.phonenumber,
+  //     })
+  //   })
+  //     .then((response) => response.json())
+  //     .then((res) => {
+  //       if (res.success === false) {
+  //         alert(res.message);
+  //       }
+  //     })
+  //     .done();
+  // }
+
+  // getdata() {
+  //   return Promise.all([this.getmessages(), this.getfriends()]);
+  // }
+
+  async getchatMessagesandId(item) {
+    var temp = await AsyncStorage.getItem(this.state.phonenumber + " " + item.sender + " Messages");
+    var Messages = JSON.parse(temp);
+    if (Messages !== null) {
+      this.setState({ chatMessages: Messages });
+    }
   }
 
-  getfriends() {
-    return fetch('http://10.23.0.245:3000/getfriends', {
+  async loadCredentials() {
+    const phonenumber = await AsyncStorage.getItem('phonenumber');
+    this.setState({ phonenumber: phonenumber });
+    fetch('http://192.168.43.101:3000/getfriends', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -39,66 +87,37 @@ export default class Home extends React.Component {
       })
     })
       .then((response) => response.json())
-  }
-
-  deletemessages() {
-    return fetch('http://10.23.0.245:3000/deletemessages', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        receiver: this.state.phonenumber,
-      })
-    })
-      .then((response) => response.json())
       .then((res) => {
-        if (res.success === false) {
+        if (res.success === true) {
+          this.setState({ friends: res.friend });
+        }
+        else {
           alert(res.message);
         }
       })
       .done();
-  }
-
-  getdata() {
-    return Promise.all([this.getmessages(), this.getfriends()]);
-  }
-
-  async getchatMessagesandId(item) {
-    console.log("Fuck ya bitch");
-    var temp = await AsyncStorage.getItem(this.state.phonenumber + " " + item.sender + " Messages");
-    var Messages = JSON.parse(temp);
-    if (Messages !== null) {
-      this.setState({chatMessages: Messages});
-    }
-  }
-
-  async loadCredentials() {
-    const phonenumber = await AsyncStorage.getItem('phonenumber');
-    this.setState({ phonenumber: phonenumber });
-    this.getdata()
-      .then(([messages, friends]) => {
-        if (messages.success === false || friends.success === false) {
-          alert("Could not connect to database");
-        }
-        else {
-          messages.message.map(async (item) => {
-            this.getchatMessagesandId(item);
-            var temporary = [...this.state.chatMessages, { sender: item.sender, message: item.message }];
-            console.log(this.state.chatMessages);
-            console.log("Hey");
-            console.log(temporary);
-            await AsyncStorage.setItem(this.state.phonenumber + " " + item.sender + " Messages", JSON.stringify(temporary));
-          })
-          friends.friend.map((item) => {
-            var count = 0, lastmessage = "No new messages";
-            const temporary = [...this.state.friends, { newMessages: count, friend: item.friend, name: item.name, last: lastmessage }];
-            this.setState({ friends: temporary });
-          })
-        }
-      })
-    this.deletemessages();
+    // this.getdata()
+    //   .then(([messages, friends]) => {
+    //     if (messages.success === false || friends.success === false) {
+    //       alert("Could not connect to database");
+    //     }
+    //     else {
+    //       messages.message.map(async (item) => {
+    //         this.getchatMessagesandId(item);
+    //         var temporary = [...this.state.chatMessages, { sender: item.sender, message: item.message }];
+    //         console.log(this.state.chatMessages);
+    //         console.log("Hey");
+    //         console.log(temporary);
+    //         await AsyncStorage.setItem(this.state.phonenumber + " " + item.sender + " Messages", JSON.stringify(temporary));
+    //       })
+    //       friends.friend.map((item) => {
+    //         var count = 0, lastmessage = "No new messages";
+    //         const temporary = [...this.state.friends, { newMessages: count, friend: item.friend, name: item.name, last: lastmessage }];
+    //         this.setState({ friends: temporary });
+    //       })
+    //     }
+    //   })
+    // this.deletemessages();
   }
 
   logout = async () => {
@@ -141,7 +160,7 @@ export default class Home extends React.Component {
 
   render() {
     return (
-      <View style={styles.container}>
+      <View style={styles.container} >
         <View style={styles.headingcontainer}>
           <View style={styles.heading}>
             <TouchableOpacity onPress={() => this.props.navigation.navigate('Addfriend')}>

@@ -180,5 +180,16 @@ app.post('/isReceiverOnline', function (req, res, next) {
   }
 });
 
+app.post('/permenentStorage', function (req, res, next) {
+  var sql = "INSERT INTO storage VALUES('" + req.body.sender + "','" + req.body.receiver + "','" + req.body.message + "', now(6))";
+  connection.query(sql, function (err) {
+    if (err) {
+      console.log(err);
+      res.send({ success: false, message: err });
+    }
+    res.send({ success: true });
+  });
+});
+
 server.listen(port, () => console.log('server is running on port: ' + port));
 
