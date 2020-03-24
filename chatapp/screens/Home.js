@@ -9,6 +9,7 @@ export default class Home extends React.Component {
       phonenumber: null,
       friends: [],
       chatMessages: [],
+      // temp: null,
     };
     this.loadCredentials();
   }
@@ -102,7 +103,30 @@ export default class Home extends React.Component {
     //       alert("Could not connect to database");
     //     }
     //     else {
-    //       messages.message.map(async (item) => {
+    //         temp = new map();
+    //       friends.friend.map((item) => {
+    //         var count = 0, lastmessage = "No new messages";
+    //         const temporary = [...this.state.friends, { newMessages: count, friend: item.friend, name: item.name, last: lastmessage }];
+    //         this.setState({ friends: temporary });
+    //       })
+    //         messages.message.map(async (item) => {
+    //         this.getchatMessagesandId(item);
+    //         var temporary = [...this.state.chatMessages, { sender: item.sender, message: item.message }];
+    //         console.log(this.state.chatMessages);
+    //         console.log("Hey");
+    //         console.log(temporary);
+    //         await AsyncStorage.setItem(this.state.phonenumber + " " + item.sender + " Messages", JSON.stringify(temporary));
+    //       })
+    //     }
+    //   })
+    // this.deletemessages();
+    // this.getdata()
+    //   .then(([messages, friends]) => {
+    //     if (messages.success === false || friends.success === false) {
+    //       alert("Could not connect to database");
+    //     }
+    //     else {
+    //         messages.message.map(async (item) => {
     //         this.getchatMessagesandId(item);
     //         var temporary = [...this.state.chatMessages, { sender: item.sender, message: item.message }];
     //         console.log(this.state.chatMessages);
