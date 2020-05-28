@@ -15,7 +15,7 @@ export default class Home extends React.Component {
   }
 
   // getmessages() {
-  //   return fetch('http://192.168.43.101:3000/getmessages', {
+  //   return fetch('http://192.168.43.101/getmessages', {
   //     method: 'POST',
   //     headers: {
   //       'Accept': 'application/json',
@@ -29,7 +29,7 @@ export default class Home extends React.Component {
   // }
 
   // getfriends() {
-  //   return fetch('http://192.168.43.101:3000/getfriends', {
+  //   return fetch('http://192.168.43.101/getfriends', {
   //     method: 'POST',
   //     headers: {
   //       'Accept': 'application/json',
@@ -43,7 +43,7 @@ export default class Home extends React.Component {
   // }
 
   // deletemessages() {
-  //   return fetch('http://192.168.43.101:3000/deletemessages', {
+  //   return fetch('http://192.168.43.101/deletemessages', {
   //     method: 'POST',
   //     headers: {
   //       'Accept': 'application/json',
@@ -77,7 +77,7 @@ export default class Home extends React.Component {
   async loadCredentials() {
     const phonenumber = await AsyncStorage.getItem('phonenumber');
     this.setState({ phonenumber: phonenumber });
-    fetch('http://192.168.43.101:3000/getfriends', {
+    fetch('http://13.233.7.44/getfriends', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',

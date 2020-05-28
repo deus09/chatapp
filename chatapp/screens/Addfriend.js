@@ -23,7 +23,7 @@ export default class Addfriend extends React.Component {
     }
 
     addfriend = () => {
-        fetch('http://192.168.43.101:3000/addfriend', {
+        fetch('http://13.233.7.44/addfriend', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -49,7 +49,7 @@ export default class Addfriend extends React.Component {
     }
 
     checkforfriend = async () => {
-        fetch('http://192.168.43.101:3000/alreadyfriend', {
+        fetch('http://13.233.7.44/alreadyfriend', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -77,7 +77,7 @@ export default class Addfriend extends React.Component {
             alert('Enter a valid number');
         }
         else {
-            fetch('http://192.168.43.101:3000/checkforexistinguser', {
+            fetch('http://13.233.7.44/checkforexistinguser', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',

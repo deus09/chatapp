@@ -18,7 +18,7 @@ export default class Register extends React.Component {
     }
 
     userDoesnotexit = () => {
-        fetch('http://192.168.43.101:3000/register', {
+        fetch('http://13.233.7.44/register', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -51,7 +51,7 @@ export default class Register extends React.Component {
             alert('Details are not valid');
         }
         else {
-            fetch('http://192.168.43.101:3000/checkforexistinguser', {
+            fetch('http://13.233.7.44/checkforexistinguser', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',

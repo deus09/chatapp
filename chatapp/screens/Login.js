@@ -8,27 +8,29 @@ export default class Login extends React.Component {
             phonenumber: null,
             password: null,
         }
-        this._loadInitialState();
+        // this._loadInitialState();
     }
 
-    _loadInitialState = async () => {
-        var value = await AsyncStorage.getItem('phonenumber');
-        if (value !== null) {
-            this.props.navigation.navigate('Home');
-        }
-    }
+    // _loadInitialState = async () => {
+    //     var value = await AsyncStorage.getItem('phonenumber');
+    //     if (value !== null) {
+    //         this.props.navigation.navigate('Home');
+    //     }
+    // }
 
     handleChange = key => val => {
         this.setState({ [key]: val })
     }
 
     submitForm = () => {
-        fetch('http://192.168.43.101:3000/login', {
+        // alert(this.state.phonenumber);
+        fetch('http://13.233.7.44/login', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             },
+            // body: "phonenumber=this.state.phonenumber&password=this.state.password"
             body: JSON.stringify({
                 phonenumber: this.state.phonenumber,
                 password: this.state.password,
@@ -37,12 +39,12 @@ export default class Login extends React.Component {
             .then((response) => response.json())
             .then(async (res) => {
                 if (res.success === true) {
-                    await AsyncStorage.setItem('phonenumber', res.phonenumber);
-                    this.props.navigation.navigate('Home');
-                }
-                else {
-                    alert(res.message);
-                }
+                        await AsyncStorage.setItem('phonenumber', res.phonenumber);
+                        this.props.navigation.navigate('Home');
+                    }
+                    else {
+                        alert(res.message);
+                    }
             })
             .done();
     }

@@ -19,7 +19,7 @@ export default class ChatScreen extends React.Component {
     }
 
     componentDidMount() {
-        this.socket = io("http://192.168.43.101:3000");
+        this.socket = io("http://13.233.7.44/");
         this.socket.on("new_message", async data => {
             const temp1 = [...this.state.chatMessages, { sender: data.sender, message: data.message }];
             this.setState({ chatMessages: temp1 });
@@ -38,7 +38,7 @@ export default class ChatScreen extends React.Component {
     }
 
     isReceiverOnline = () => {
-        return fetch('http://192.168.43.101:3000/isReceiverOnline', {
+        return fetch('http://13.233.7.44/isReceiverOnline', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -73,7 +73,7 @@ export default class ChatScreen extends React.Component {
         else {
             this.setState({ chatMessages: Messages });
         }
-        fetch('http://192.168.43.101:3000/getmessages', {
+        fetch('http://13.233.7.44/getmessages', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -99,7 +99,7 @@ export default class ChatScreen extends React.Component {
                 }
             })
             .done();
-        fetch('http://192.168.43.101:3000/deletemessages', {
+        fetch('http://13.233.7.44/deletemessages', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -120,7 +120,7 @@ export default class ChatScreen extends React.Component {
     }
 
     permenentStorage = (Currnetmessage) => {
-        fetch('http://192.168.43.101:3000/permenentStorage', {
+        fetch('http://13.233.7.44/permenentStorage', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -157,7 +157,7 @@ export default class ChatScreen extends React.Component {
                         });
                     }
                     else {
-                        fetch('http://192.168.43.101:3000/savemessage', {
+                        fetch('http://13.233.7.44/savemessage', {
                             method: 'POST',
                             headers: {
                                 'Accept': 'application/json',
