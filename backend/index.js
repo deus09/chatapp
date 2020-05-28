@@ -12,7 +12,7 @@ app.use(express.json());
 var connection = mysql.createConnection({
   host: 'localhost',
   user: 'chatapp',
-  password: 'chatapp@123',
+  password: 'Chatapp@123',
   database: 'users',
 })
 
