@@ -55,7 +55,5 @@ for i in range(len(result)):
   if occurance > 0 :
     traced.append([occurance,result[i]])
 
-traced.sort()
-
 for i in range(len(traced)):
   print(traced[i])
