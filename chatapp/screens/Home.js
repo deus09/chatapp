@@ -9,62 +9,9 @@ export default class Home extends React.Component {
       phonenumber: null,
       friends: [],
       chatMessages: [],
-      // temp: null,
     };
     this.loadCredentials();
   }
-
-  // getmessages() {
-  //   return fetch('http://192.168.43.101/getmessages', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Accept': 'application/json',
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify({
-  //       receiver: this.state.phonenumber,
-  //     })
-  //   })
-  //     .then((response) => response.json())
-  // }
-
-  // getfriends() {
-  //   return fetch('http://192.168.43.101/getfriends', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Accept': 'application/json',
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify({
-  //       usernumber: this.state.phonenumber,
-  //     })
-  //   })
-  //     .then((response) => response.json())
-  // }
-
-  // deletemessages() {
-  //   return fetch('http://192.168.43.101/deletemessages', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Accept': 'application/json',
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify({
-  //       receiver: this.state.phonenumber,
-  //     })
-  //   })
-  //     .then((response) => response.json())
-  //     .then((res) => {
-  //       if (res.success === false) {
-  //         alert(res.message);
-  //       }
-  //     })
-  //     .done();
-  // }
-
-  // getdata() {
-  //   return Promise.all([this.getmessages(), this.getfriends()]);
-  // }
 
   async getchatMessagesandId(item) {
     var temp = await AsyncStorage.getItem(this.state.phonenumber + " " + item.sender + " Messages");
@@ -97,51 +44,6 @@ export default class Home extends React.Component {
         }
       })
       .done();
-    // this.getdata()
-    //   .then(([messages, friends]) => {
-    //     if (messages.success === false || friends.success === false) {
-    //       alert("Could not connect to database");
-    //     }
-    //     else {
-    //         temp = new map();
-    //       friends.friend.map((item) => {
-    //         var count = 0, lastmessage = "No new messages";
-    //         const temporary = [...this.state.friends, { newMessages: count, friend: item.friend, name: item.name, last: lastmessage }];
-    //         this.setState({ friends: temporary });
-    //       })
-    //         messages.message.map(async (item) => {
-    //         this.getchatMessagesandId(item);
-    //         var temporary = [...this.state.chatMessages, { sender: item.sender, message: item.message }];
-    //         console.log(this.state.chatMessages);
-    //         console.log("Hey");
-    //         console.log(temporary);
-    //         await AsyncStorage.setItem(this.state.phonenumber + " " + item.sender + " Messages", JSON.stringify(temporary));
-    //       })
-    //     }
-    //   })
-    // this.deletemessages();
-    // this.getdata()
-    //   .then(([messages, friends]) => {
-    //     if (messages.success === false || friends.success === false) {
-    //       alert("Could not connect to database");
-    //     }
-    //     else {
-    //         messages.message.map(async (item) => {
-    //         this.getchatMessagesandId(item);
-    //         var temporary = [...this.state.chatMessages, { sender: item.sender, message: item.message }];
-    //         console.log(this.state.chatMessages);
-    //         console.log("Hey");
-    //         console.log(temporary);
-    //         await AsyncStorage.setItem(this.state.phonenumber + " " + item.sender + " Messages", JSON.stringify(temporary));
-    //       })
-    //       friends.friend.map((item) => {
-    //         var count = 0, lastmessage = "No new messages";
-    //         const temporary = [...this.state.friends, { newMessages: count, friend: item.friend, name: item.name, last: lastmessage }];
-    //         this.setState({ friends: temporary });
-    //       })
-    //     }
-    //   })
-    // this.deletemessages();
   }
 
   logout = async () => {
