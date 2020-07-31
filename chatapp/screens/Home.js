@@ -133,7 +133,6 @@ const styles = StyleSheet.create({
     padding: '2%',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    margin: '6.7%',
   },
   user: {
     flexDirection: 'row',
