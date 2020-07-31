@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, AsyncStorage } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, AsyncStorage, StatusBar } from 'react-native';
 
 export default class Login extends React.Component {
     constructor(props) {
@@ -37,18 +37,21 @@ export default class Login extends React.Component {
             .then((response) => response.json())
             .then(async (res) => {
                 if (res.success === true) {
-                        await AsyncStorage.setItem('phonenumber', res.phonenumber);
-                        this.props.navigation.navigate('Home');
-                    }
-                    else {
-                        alert(res.message);
-                    }
+                    await AsyncStorage.setItem('phonenumber', res.phonenumber);
+                    this.setState({ phonenumber: null, password: null });
+                    this.props.navigation.navigate('Home');
+                }
+                else {
+                    alert(res.message);
+                    this.setState({ phonenumber: null, password: null });
+                }
             })
             .done();
     }
     render() {
         return (
             <View style={styles.container}>
+                <StatusBar hidden={false} barStyle="light-content"/>
                 <View style={styles.top}>
                     <Text style={styles.text}>Chat App</Text>
                 </View>
@@ -80,11 +83,11 @@ export default class Login extends React.Component {
                             alignSelf: 'center',
                         }}
                     />
-                    <View style={{alignItems: 'center'}}>
+                    <View style={{ alignItems: 'center' }}>
                         <Text>Don't have an account?</Text>
-                        <Text style={{height: '1%'}}></Text>
+                        <Text style={{ height: '1%' }}></Text>
                         <TouchableOpacity onPress={() => this.props.navigation.navigate('Register')}>
-                            <Text style={{color: 'grey'}}>Create account</Text>
+                            <Text style={{ color: 'grey' }}>Create account</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
