@@ -73,7 +73,7 @@ export default class ChatScreen extends React.Component {
         else {
             this.setState({ chatMessages: Messages });
         }
-        fetch('http://13.233.7.44/getmessages', {
+        const response = await fetch('http://13.233.7.44/getmessages', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -84,22 +84,19 @@ export default class ChatScreen extends React.Component {
                 receiver: this.state.sender,
             })
         })
-            .then((response) => response.json())
-            .then((res) => {
-                if (res.success === true) {
-                    this.setState({ temp: res.message });
-                    this.state.temp.map(async (item) => {
-                        const temp = [...this.state.chatMessages, { sender: receiver, message: item.message }];
-                        this.setState({ chatMessages: temp });
-                        await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));
-                    })
-                }
-                else {
-                    alert(res.message);
-                }
+        const res = await response.json();
+        if (res.success === true) {
+            this.setState({ temp: res.message });
+            this.state.temp.map(async (item) => {
+                const temp1 = [...this.state.chatMessages, { sender: receiver, message: item.message }];
+                this.setState({ chatMessages: temp1 });
+                await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp1));
             })
-            .done();
-        fetch('http://13.233.7.44/deletemessages', {
+        }
+        else {
+            alert(res.message);
+        }
+        const response1 = await fetch('http://13.233.7.44/deletemessages', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -110,13 +107,10 @@ export default class ChatScreen extends React.Component {
                 receiver: this.state.sender,
             })
         })
-            .then((response) => response.json())
-            .then((res) => {
-                if (res.success === false) {
-                    alert(res.message);
-                }
-            })
-            .done();
+        const res1 = await response1.json();
+        if (res1.success === false) {
+            alert(res1.message);
+        }
     }
 
     permenentStorage = (Currnetmessage) => {
@@ -127,8 +121,8 @@ export default class ChatScreen extends React.Component {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                sender: this.state.receiver,
-                receiver: this.state.sender,
+                sender: this.state.sender,
+                receiver: this.state.receiver,
                 message: Currnetmessage,
             })
         })
@@ -178,6 +172,7 @@ export default class ChatScreen extends React.Component {
                             .done();
                     }
                 })
+                .done();
         }
         this.permenentStorage(chatMessage);
         const temp = [...this.state.chatMessages, { sender: this.state.sender, message: chatMessage }];
