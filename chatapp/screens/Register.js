@@ -44,7 +44,7 @@ export default class Register extends React.Component {
     }
 
     submitForm = () => {
-        if (this.state.firstname < 1 || this.state.lastname < 1 || this.state.Phonenumber == null || this.state.Phonenumber.length < 10) {
+        if (this.state.firstname === null || this.state.firstname.length < 1 || this.state.lastname === null || this.state.lastname.length < 1 || this.state.Phonenumber === null || this.state.Phonenumber.length < 10 || this.state.password === null || this.state.password.length < 1) {
             alert('Details are not valid');
         }
         else if (this.state.password != this.state.confirmPassword) {
@@ -98,6 +98,7 @@ export default class Register extends React.Component {
                         />
                         <TextInput
                             placeholder="Phone Number"
+                            keyboardType="number-pad"
                             style={styles.input}
                             value={this.state.Phonenumber}
                             onChangeText={this.handleChange('Phonenumber')}
