@@ -1,6 +1,5 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, AsyncStorage, FlatList, Image } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
 
 export default class Home extends React.Component {
   constructor(props) {
@@ -8,23 +7,15 @@ export default class Home extends React.Component {
     this.state = {
       phonenumber: null,
       friends: [],
-      chatMessages: [],
+      refreshing: false,
     };
     this.loadCredentials();
-  }
-
-  async getchatMessagesandId(item) {
-    var temp = await AsyncStorage.getItem(this.state.phonenumber + " " + item.sender + " Messages");
-    var Messages = JSON.parse(temp);
-    if (Messages !== null) {
-      this.setState({ chatMessages: Messages });
-    }
   }
 
   async loadCredentials() {
     const phonenumber = await AsyncStorage.getItem('phonenumber');
     this.setState({ phonenumber: phonenumber });
-    fetch('http://13.233.7.44/getfriends', {
+    const response = await fetch('http://13.233.7.44/getfriends', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -34,17 +25,15 @@ export default class Home extends React.Component {
         usernumber: this.state.phonenumber,
       })
     })
-      .then((response) => response.json())
-      .then((res) => {
-        if (res.success === true) {
-          this.setState({ friends: res.friend });
-        }
-        else {
-          alert(res.message);
-        }
-      })
-      .done();
-  }
+    const res = await response.json();
+    if (res.success === true) {
+      this.setState({ friends: res.friend });
+    }
+    else {
+      alert(res.message);
+    }
+    this.setState({refreshing: false});
+   }
 
   logout = async () => {
     await AsyncStorage.removeItem('phonenumber');
@@ -65,11 +54,8 @@ export default class Home extends React.Component {
           onPress={() => this.enterChat(item.friend, item.name)}
         >
           <Text style={{ fontSize: 20, marginLeft: '3%', fontWeight: 'bold' }}>{item.name}</Text>
-          {/* <Text style={{ fontSize: 20, marginRight: '4%' }}>{item.newMessages}</Text> */}
         </TouchableOpacity>
         <View style={{ flexDirection: 'row' }}>
-          {/* <AntDesign style={{ marginLeft: '2.5%' }} name="caretright" size={12} color="black" /> */}
-          {/* <Text style={{ fontSize: 12 }}>    {item.last}</Text> */}
         </View>
         <View
           style={{
@@ -83,6 +69,15 @@ export default class Home extends React.Component {
       </View>
     );
   }
+
+  handleRefresh = () => {
+    this.setState({
+      refreshing: true,
+    },
+    () => {
+      this.loadCredentials();
+    })
+  };
 
   render() {
     return (
@@ -117,6 +112,8 @@ export default class Home extends React.Component {
           data={this.state.friends}
           renderItem={this.renderItem}
           keyExtractor={(item, index) => index.toString()}
+          refreshing={this.state.refreshing}
+          onRefresh={this.handleRefresh}    
         />
       </View>
     );
@@ -136,7 +133,6 @@ const styles = StyleSheet.create({
     padding: '2%',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: '6.7%',
   },
   user: {
     flexDirection: 'row',
