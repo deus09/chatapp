@@ -5,7 +5,7 @@ export default class Success extends React.Component {
     render() {
         return (
             <View style={styles.container}>
-                <Text>Account created successfully</Text>
+                <Text>Account created successfully!!!</Text>
                 <TouchableOpacity
                     onPress={() => this.props.navigation.navigate('Login')}
                 >
