@@ -44,11 +44,11 @@ export default class Register extends React.Component {
     }
 
     submitForm = () => {
-        if (this.state.password !== this.state.confirmPassword) {
-            alert('Passwords do not match');
-        }
-        else if (this.state.firstname < 1 || this.state.lastname < 1 || this.state.Phonenumber === null || this.state.Phonenumber.length < 10) {
+        if (this.state.firstname < 1 || this.state.lastname < 1 || this.state.Phonenumber == null || this.state.Phonenumber.length < 10) {
             alert('Details are not valid');
+        }
+        else if (this.state.password != this.state.confirmPassword) {
+            alert('Passwords do not match');
         }
         else {
             fetch('http://13.233.7.44/checkforexistinguser', {
