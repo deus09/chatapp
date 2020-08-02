@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, AsyncStorage, StatusBar } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, AsyncStorage } from 'react-native';
+import { encrypt, decrypt } from '../cryptography/cryptography.js';
 
 export default class Login extends React.Component {
     constructor(props) {
@@ -10,7 +11,7 @@ export default class Login extends React.Component {
         }
         this._loadInitialState();
     }
-
+    
     _loadInitialState = async () => {
         var value = await AsyncStorage.getItem('phonenumber');
         if (value !== null) {
@@ -22,42 +23,50 @@ export default class Login extends React.Component {
         this.setState({ [key]: val })
     }
 
-    submitForm = () => {
-        fetch('http://13.233.7.44/login', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                phonenumber: this.state.phonenumber,
-                password: this.state.password,
+    submitForm = async () => {
+        if(this.state.phonenumber === null || this.state.phonenumber.length < 1 || this.state.password === null || this.state.password.length < 1)
+        {
+            alert("Enter valid details");            
+        }
+        else
+        {
+            var phonenumber = await encrypt(this.state.phonenumber);
+            var password = await encrypt(this.state.password);
+            this.setState({ phonenumber: null, password: null });
+            fetch('http://13.233.7.44/login', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    phonenumber: phonenumber,
+                    password: password,
+                })
             })
-        })
-            .then((response) => response.json())
-            .then(async (res) => {
-                if (res.success === true) {
-                    await AsyncStorage.setItem('phonenumber', res.phonenumber);
-                    this.setState({ phonenumber: null, password: null });
-                    this.props.navigation.navigate('Home');
-                }
-                else {
-                    alert(res.message);
-                    this.setState({ phonenumber: null, password: null });
-                }
-            })
-            .done();
+                .then((response) => response.json())
+                .then(async (res) => {
+                    if (res.success === true) {
+                        await AsyncStorage.setItem('phonenumber', res.phonenumber);
+                        this.props.navigation.navigate('Home');
+                    }
+                    else {
+                        alert(res.message);
+                    }
+                })
+                .done();
+        }
     }
     render() {
         return (
             <View style={styles.container}>
-                <StatusBar hidden={false} barStyle="light-content"/>
                 <View style={styles.top}>
                     <Text style={styles.text}>Chat App</Text>
                 </View>
                 <View style={styles.middle}>
                     <TextInput
                         placeholder='Phone Number'
+                        placeholderTextColor='#d3d3d3'
                         keyboardType='number-pad'
                         style={styles.input}
                         value={this.state.phonenumber}
@@ -65,29 +74,30 @@ export default class Login extends React.Component {
                     />
                     <TextInput
                         placeholder="Password"
+                        placeholderTextColor='#d3d3d3'
                         secureTextEntry
                         style={styles.input}
                         value={this.state.password}
                         onChangeText={this.handleChange('password')}
                     />
                     <TouchableOpacity style={styles.submitbtn} onPress={this.submitForm}>
-                        <Text style={{ alignSelf: 'center', padding: '4%' }}>Login</Text>
+                        <Text style={{ alignSelf: 'center', color: '#000000', padding: '4%' }}>Login</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.bottom}>
                     <View
                         style={{
-                            borderBottomColor: 'black',
+                            borderBottomColor: '#000000',
                             borderBottomWidth: 1,
                             width: '90%',
                             alignSelf: 'center',
                         }}
                     />
                     <View style={{ alignItems: 'center' }}>
-                        <Text>Don't have an account?</Text>
+                        <Text style={styles.Text} >Don't have an account?</Text>
                         <Text style={{ height: '1%' }}></Text>
                         <TouchableOpacity onPress={() => this.props.navigation.navigate('Register')}>
-                            <Text style={{ color: 'grey' }}>Create account</Text>
+                            <Text style={{ color: '#808080' }}>Create account</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -101,6 +111,7 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'column',
         justifyContent: 'space-between',
+        backgroundColor: '#ffffff',
     },
     top: {
         marginTop: '20%',
@@ -111,22 +122,27 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 50,
         fontWeight: 'bold',
-        alignSelf: 'center'
+        alignSelf: 'center',
+        color: '#000000',
     },
     input: {
         padding: 10,
         marginBottom: 10,
         width: '90%',
         alignSelf: 'center',
-        borderColor: '#ccc',
+        borderColor: '#d3d3d3',
         borderWidth: 1,
         borderRadius: 5,
+        color: '#000000',
     },
     submitbtn: {
         alignSelf: 'center',
-        borderColor: '#ccc',
+        borderColor: '#d3d3d3',
         borderWidth: 1,
         borderRadius: 5,
         width: '20%',
     },
+    Text: {
+        color: '#000000',
+    }
 });

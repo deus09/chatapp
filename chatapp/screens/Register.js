@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { encrypt, decrypt } from '../cryptography/cryptography.js';
 
 export default class Register extends React.Component {
     constructor(props) {
@@ -10,6 +11,11 @@ export default class Register extends React.Component {
             Phonenumber: null,
             password: null,
             confirmPassword: null,
+            tempfirstname: null,
+            templastname: null,
+            tempPhonenumber: null,
+            temppassword: null,
+            tempconfirmPassword: null,
         }
     }
 
@@ -25,10 +31,10 @@ export default class Register extends React.Component {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                firstname: this.state.firstname,
-                lastname: this.state.lastname,
-                Phonenumber: this.state.Phonenumber,
-                password: this.state.password,
+                firstname: this.state.tempfirstname,
+                lastname: this.state.templastname,
+                Phonenumber: this.state.tempPhonenumber,
+                password: this.state.temppassword,
             })
         })
             .then((response) => response.json())
@@ -43,7 +49,7 @@ export default class Register extends React.Component {
             .done();
     }
 
-    submitForm = () => {
+    submitForm = async () => {
         if (this.state.firstname === null || this.state.firstname.length < 1 || this.state.lastname === null || this.state.lastname.length < 1 || this.state.Phonenumber === null || this.state.Phonenumber.length < 10 || this.state.password === null || this.state.password.length < 1) {
             alert('Details are not valid');
         }
@@ -51,6 +57,13 @@ export default class Register extends React.Component {
             alert('Passwords do not match');
         }
         else {
+            this.setState({
+                tempfirstname: await encrypt(this.state.firstname),
+                templastname: await encrypt(this.state.lastname),
+                tempPhonenumber: await encrypt(this.state.Phonenumber),
+                temppassword: await encrypt(this.state.password),
+                tempconfirmPassword: await encrypt(this.state.confirmPassword),
+            })
             fetch('http://13.233.7.44/checkforexistinguser', {
                 method: 'POST',
                 headers: {
@@ -58,7 +71,7 @@ export default class Register extends React.Component {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    Phonenumber: this.state.Phonenumber,
+                    Phonenumber: this.state.tempPhonenumber,
                 })
             })
                 .then((response) => response.json())
@@ -86,18 +99,21 @@ export default class Register extends React.Component {
                     <View style={styles.middle}>
                         <TextInput
                             placeholder="First Name"
+                            placeholderTextColor="#d3d3d3"
                             style={styles.input}
                             value={this.state.firstname}
                             onChangeText={this.handleChange('firstname')}
                         />
                         <TextInput
                             placeholder="Last Name"
+                            placeholderTextColor="#d3d3d3"
                             style={styles.input}
                             value={this.state.lastname}
                             onChangeText={this.handleChange('lastname')}
                         />
                         <TextInput
                             placeholder="Phone Number"
+                            placeholderTextColor="#d3d3d3"
                             keyboardType="number-pad"
                             style={styles.input}
                             value={this.state.Phonenumber}
@@ -105,6 +121,7 @@ export default class Register extends React.Component {
                         />
                         <TextInput
                             placeholder="Password"
+                            placeholderTextColor="#d3d3d3"
                             secureTextEntry
                             style={styles.input}
                             value={this.state.password}
@@ -112,6 +129,7 @@ export default class Register extends React.Component {
                         />
                         <TextInput
                             placeholder="Confirm Password"
+                            placeholderTextColor="#d3d3d3"
                             secureTextEntry
                             style={styles.input}
                             value={this.state.confirmPassword}
@@ -123,7 +141,7 @@ export default class Register extends React.Component {
                             style={styles.submitbtn}
                             onPress={this.submitForm}
                         >
-                            <Text>Submit</Text>
+                            <Text style={styles.Text}>Submit</Text>
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
@@ -136,16 +154,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
-        backgroundColor: '#fff',
+        backgroundColor: '#ffffff',
         justifyContent: 'space-between',
-    },
-    top: {
-        margin: '10%'
     },
     heading: {
         fontSize: 20,
         alignSelf: 'center',
         fontWeight: 'bold',
+        color: '#000000',
     },
     middle: {
         margin: '5%',
@@ -163,5 +179,8 @@ const styles = StyleSheet.create({
     },
     submitbtn: {
         alignItems: 'center',
+    },
+    Text: {
+        color: '#000000',
     }
 });

@@ -1,7 +1,10 @@
 import React from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, FlatList, KeyboardAvoidingView, AsyncStorage } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, AsyncStorage, FlatList, KeyboardAvoidingView, ActivityIndicator, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import io from 'socket.io-client';
+import { encrypt, decrypt } from '../cryptography/cryptography.js';
+
+const keyboardVerticalOffset = Platform.OS === 'ios' ? 40 : 0;
 
 export default class ChatScreen extends React.Component {
     constructor(props) {
@@ -14,6 +17,9 @@ export default class ChatScreen extends React.Component {
             receiver: null,
             isReceiverOnline: null,
             socket: null,
+            decrypted: [],
+            refreshing: false,
+            loaded: false,
         }
         this._details();
     }
@@ -62,6 +68,7 @@ export default class ChatScreen extends React.Component {
         this.setState({ receiver: receiver });
         const receivername = await AsyncStorage.getItem('currentname');
         this.setState({ receivername: receivername });
+        this.state.decrypted[receivername]=await decrypt(receivername);
         this.socket.emit("user_connected", {
             sender: this.state.sender,
         });
@@ -73,6 +80,11 @@ export default class ChatScreen extends React.Component {
         else {
             this.setState({ chatMessages: Messages });
         }
+        await this.state.chatMessages.map(async (item) => {
+            this.state.decrypted[item.message] = await decrypt(item.message);
+            console.log(this.state.decrypted[item.message]);
+            this.setState({ loaded: true});
+        })
         const response = await fetch('http://13.233.7.44/getmessages', {
             method: 'POST',
             headers: {
@@ -91,6 +103,8 @@ export default class ChatScreen extends React.Component {
                 const temp1 = [...this.state.chatMessages, { sender: receiver, message: item.message }];
                 this.setState({ chatMessages: temp1 });
                 await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp1));
+                this.state.decrypted[item.message] = await decrypt(item.message);
+                this.setState({loaded: true});
             })
         }
         else {
@@ -111,6 +125,7 @@ export default class ChatScreen extends React.Component {
         if (res1.success === false) {
             alert(res1.message);
         }
+        this.setState({ refreshing: false, loaded: true });
     }
 
     permenentStorage = (Currnetmessage) => {
@@ -136,12 +151,13 @@ export default class ChatScreen extends React.Component {
     }
 
     sendmessage = async () => {
-        var chatMessage = this.state.chatMessage;
+        this.setState({loaded: false});
         if (chatMessage === null) {
             alert("Invalid message");
             return;
         }
         else {
+            var chatMessage = await encrypt(this.state.chatMessage);
             this.getInformation()
                 .then(([res]) => {
                     if (res.success === true) {
@@ -179,52 +195,87 @@ export default class ChatScreen extends React.Component {
         this.setState({ chatMessages: temp });
         await AsyncStorage.setItem(this.state.sender + " " + this.state.receiver + " Messages", JSON.stringify(temp));
         this.setState({ chatMessage: null });
+        this.state.decrypted[chatMessage]= await decrypt(chatMessage);
+        this.setState({loaded: true});
     }
 
-    getTextStyle(name1, name2) {
+    getTextStyle = (name1, name2) => {
         if (name1 === name2) {
-            return { alignSelf: 'flex-end', borderWidth: 1, borderRadius: 5, padding: 3, marginBottom: 3, marginRight: 7 }
+            return { alignSelf: 'flex-end', color: '#000000', borderWidth: 1, borderRadius: 5, padding: 3, marginBottom: 3, marginRight: 7 }
         }
         else {
-            return { alignSelf: 'flex-start', borderWidth: 1, borderRadius: 5, padding: 3, marginBottom: 3, marginLeft: 7 }
+            return { alignSelf: 'flex-start', color: '#000000', borderWidth: 1, borderRadius: 5, padding: 3, marginBottom: 3, marginLeft: 7 }
         }
     }
 
     renderItem = ({ item }) => {
+        console.log(item.message);
+        console.log(this.state.decrypted[item.message]);
         return (
-            <Text style={this.getTextStyle(this.state.sender, item.sender)}>{item.message}</Text>
+            <Text style={this.getTextStyle(this.state.sender, item.sender)}>{(this.state.decrypted[item.message])}</Text>
         );
+    }
+
+    handleRefresh = () => {
+        this.setState({
+          refreshing: true,
+        },
+        () => {
+          this._details();
+        })
+      };
+
+    handleRender = () => {
+        console.log(this.state.loaded);
+        if(this.state.loaded){
+            return (
+            <FlatList
+                ref={ref => {this.scrollView = ref}}
+                onContentSizeChange={() => this.scrollView.scrollToEnd({animated: true})}
+                data={this.state.chatMessages}
+                renderItem={this.renderItem}
+                keyExtractor={(item, index) => index.toString()}
+                refreshing={this.state.refreshing}
+                onRefresh={this.handleRefresh}
+            />);
+        }
+        else{
+            return (
+                <ActivityIndicator size={40}/>
+            );
+        }
     }
 
     render() {
         return (
             <View style={styles.container}>
-                <Text style={{ fontSize: 23, fontWeight: 'bold', alignSelf: 'center', marginTop: '10%' }}>{this.state.receivername}</Text>
+                <View>
+                <Text style={{ fontSize: 23, color: '#000000', fontWeight: 'bold', alignSelf: 'center' }}>{this.state.decrypted[this.state.receivername]}</Text>
                 <View
                     style={{
                         marginTop: '1%',
-                        borderBottomColor: '#ccc',
+                        borderBottomColor: '#d3d3d3',
                         borderBottomWidth: 1,
                         width: '100%',
                         alignSelf: 'center',
                         marginBottom: 3,
                     }}
                 />
-                <FlatList
-                    data={this.state.chatMessages}
-                    renderItem={this.renderItem}
-                    keyExtractor={(item, index) => index.toString()}
-                />
-                <KeyboardAvoidingView behavior='padding'>
+                </View>
+                {this.handleRender()}
+                <KeyboardAvoidingView
+                    behavior="padding"
+                >
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         <TextInput
                             placeholder='Type a message...'
+                            placeholderTextColor="#d3d3d3"
                             style={styles.input}
                             value={this.state.chatMessage}
                             onChangeText={this.handleChange('chatMessage')}
                         />
                         <TouchableOpacity onPress={this.sendmessage}>
-                            <MaterialIcons name="send" size={45} />
+                            <MaterialIcons name="send" color='#000000' size={45} />
                         </TouchableOpacity>
                     </View>
                 </KeyboardAvoidingView>
@@ -238,19 +289,20 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'column',
         justifyContent: 'space-between',
+        backgroundColor: '#ffffff',
     },
     input: {
         marginLeft: 2,
         padding: 10,
         marginBottom: 10,
         width: '85%',
-        borderColor: '#ccc',
+        borderColor: '#d3d3d3',
         borderWidth: 1,
         borderRadius: 5,
     },
     submitbtn: {
         alignSelf: 'center',
-        borderColor: '#ccc',
+        borderColor: '#d3d3d3',
         borderWidth: 1,
         borderRadius: 5,
         width: '20%',
