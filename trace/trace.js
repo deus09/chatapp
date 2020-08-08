@@ -16,26 +16,7 @@ function encrypt(data){
 })
 };
 
-function decrypt(data){
-  var key="", Encrypted="";
-  var flag=1;
-  var original;
-  for(var i=0;i<data.length;i++)
-  {
-    if(data[i]==='$')
-    {
-      flag=0;
-      continue;
-    }
-    if(flag)
-    {
-      key+=data[i];
-    }
-    else
-    {
-      Encrypted+=data[i];
-    }
-  }
+function decrypt(key,Encrypted){
   key = CryptoJS.enc.Hex.parse(key.toString('hex'));
   var decrypted = CryptoJS.AES.decrypt(Encrypted, key, { 
       iv: iv, 
@@ -43,6 +24,7 @@ function decrypt(data){
   console.log(decrypted.toString(CryptoJS.enc.Utf8));
 }
 
-const data = prompt('Message: ');
+const key = process.argv[2].toString();
+const Encrypted = process.argv[3].toString();
 
-encrypt(data);
+decrypt(key,Encrypted);

@@ -1,4 +1,8 @@
 import mysql.connector
+import sys
+import json
+from Naked.toolshed.shell import execute_js,muterun_js
+
 database = mysql.connector.connect(
   host = 'localhost',
   user = 'root',
@@ -8,6 +12,25 @@ database = mysql.connector.connect(
 cursor = database.cursor()
 cursor.execute("SELECT * FROM storage")
 result = cursor.fetchall()
+
+def seperateKeyAndEncryptedText(Encrypted):
+	key=""
+	encrypted=""
+	flag=1
+	for i in range(len(Encrypted)):
+		if Encrypted[i]=='$':
+			flag=0
+			continue
+		if flag:
+			key+=Encrypted[i]
+		else:
+			encrypted+=Encrypted[i]
+	return [key,encrypted]
+
+def requestDecrypted(encrypted):
+  text = seperateKeyAndEncryptedText(encrypted);
+  response = muterun_js('trace.js',text[0]+" "+text[1])
+  return str(response.stdout)[2:-3]
 
 def generate_lps(pattern):
   lps = [0]*(len(pattern))
@@ -44,16 +67,18 @@ def KMPsearch(text,pattern):
         i += 1
   return count
 
-traced = []
+traced = None
 
 message = input("Enter Message which should be traced : ")
 
 lps = generate_lps(message)
 
 for i in range(len(result)):
-  occurance = KMPsearch(result[i][2],message)
+  decrypted = requestDecrypted(result[i][2])
+  occurance = KMPsearch(decrypted,message)
   if occurance > 0 :
-    traced.append(result[i])
+    traced=result[i]
 
-print('sender: ' + traced[0][0]);
-print('receiver: ' + traced[0][1]);
+if traced!=None:
+  print('sender: ' + decrypted(traced[0]))
+  print('receiver: ' + decrypted(traced[1]))
