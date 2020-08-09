@@ -78,6 +78,7 @@ for i in range(len(result)):
   occurance = KMPsearch(decrypted,message)
   if occurance > 0 :
     traced=result[i]
+    break
 
 if traced!=None:
   print('sender: ' + decrypted(traced[0]))

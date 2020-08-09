@@ -1,7 +1,5 @@
-var mysql = require('mysql');
 var CryptoJS = require("crypto-js");
 var crypto = require('crypto');
-const prompt = require('prompt-sync')();
 
 var iv   = CryptoJS.enc.Hex.parse("814fa0c9672c550f2215a2528ca59587");
 
