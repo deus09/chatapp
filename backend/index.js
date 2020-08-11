@@ -11,10 +11,45 @@ app.use(express.json());
 
 var connection = mysql.createConnection({
   host: 'localhost',
-  user: 'chatapp',
-  password: 'Chatapp@123',
+  user: 'root',
+  password: 'password',
   database: 'users',
 })
+
+
+/*
+users database contains 4 tables
+1) Storage
+=> This table will be used while origin tracing, i.e, to trace the source of message.
+=> This table has four columns:
+        i) sender (datatype varchar(250))
+        ii) receiver (datatype varchar(250))
+        iii) message (datatype varchar(250))
+        iv) timestamp (datatype timestamp(6))
+
+2) user
+=> This table contains details about user.
+=> This table has four columns:
+        i) firstname (datatype varchar(250))
+        ii) lastname (datatype varchar(250))
+        iii) phonenumber (datatype varchar(250))
+        iv) password (datatype varchar(250))
+        
+3) friends
+=> This table contains details about friends.
+=> This table has three columns:
+        i) user (datatype varchar(250))
+        ii) name (datatype varchar(250))
+        iii) friend (datatype varchar(250))
+
+4) message
+=> This table contains details about pending messages.
+=> This table has three columns:
+        i) sender (datatype varchar(250))
+        ii) receiver (datatype varchar(250))
+        iii) message (datatype varchar(250))
+*/
+
 
 users = [];
 
