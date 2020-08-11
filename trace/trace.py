@@ -6,7 +6,7 @@ from Naked.toolshed.shell import execute_js,muterun_js
 database = mysql.connector.connect(
   host = 'localhost',
   user = 'root',
-  password = 'abcdef1234',
+  password = 'password',
   database = 'users',
 )
 cursor = database.cursor()
