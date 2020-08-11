@@ -26,7 +26,7 @@ export default class Addfriend extends React.Component {
     }
 
     addfriend = () => {
-        fetch('http://13.233.7.44/addfriend', {
+        fetch('http://localhost:3000/addfriend', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -52,7 +52,7 @@ export default class Addfriend extends React.Component {
     }
 
     checkforfriend = async () => {
-        fetch('http://13.233.7.44/alreadyfriend', {
+        fetch('http://localhost:3000/alreadyfriend', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -87,7 +87,7 @@ export default class Addfriend extends React.Component {
                 tempphonenumber: await encrypt(this.state.phonenumber),
                 tempname: await encrypt(this.state.name),
             });
-            fetch('http://13.233.7.44/checkforexistinguser', {
+            fetch('http://localhost:3000/checkforexistinguser', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
