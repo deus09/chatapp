@@ -33,7 +33,7 @@ export default class Login extends React.Component {
             var phonenumber = await encrypt(this.state.phonenumber);
             var password = await encrypt(this.state.password);
             this.setState({ phonenumber: null, password: null });
-            fetch('http://13.233.7.44/login', {
+            fetch('http://localhost:3000/login', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
