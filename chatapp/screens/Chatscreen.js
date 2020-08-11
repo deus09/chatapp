@@ -25,7 +25,7 @@ export default class ChatScreen extends React.Component {
     }
 
     componentDidMount() {
-        this.socket = io("http://13.233.7.44/");
+        this.socket = io("http://localhost:3000/");
         this.socket.on("new_message", async data => {
             const temp1 = [...this.state.chatMessages, { sender: data.sender, message: data.message }];
             this.setState({ chatMessages: temp1 });
@@ -44,7 +44,7 @@ export default class ChatScreen extends React.Component {
     }
 
     isReceiverOnline = () => {
-        return fetch('http://13.233.7.44/isReceiverOnline', {
+        return fetch('http://localhost:3000/isReceiverOnline', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -85,7 +85,7 @@ export default class ChatScreen extends React.Component {
             console.log(this.state.decrypted[item.message]);
             this.setState({ loaded: true});
         })
-        const response = await fetch('http://13.233.7.44/getmessages', {
+        const response = await fetch('http://localhost:3000/getmessages', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -110,7 +110,7 @@ export default class ChatScreen extends React.Component {
         else {
             alert(res.message);
         }
-        const response1 = await fetch('http://13.233.7.44/deletemessages', {
+        const response1 = await fetch('http://localhost:3000/deletemessages', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -129,7 +129,7 @@ export default class ChatScreen extends React.Component {
     }
 
     permenentStorage = (Currnetmessage) => {
-        fetch('http://13.233.7.44/permenentStorage', {
+        fetch('http://localhost:3000/permenentStorage', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
