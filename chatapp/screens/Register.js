@@ -24,7 +24,7 @@ export default class Register extends React.Component {
     }
 
     userDoesnotexit = () => {
-        fetch('http://13.233.7.44/register', {
+        fetch('http://localhost:3000/register', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -64,7 +64,7 @@ export default class Register extends React.Component {
                 temppassword: await encrypt(this.state.password),
                 tempconfirmPassword: await encrypt(this.state.confirmPassword),
             })
-            fetch('http://13.233.7.44/checkforexistinguser', {
+            fetch('http://localhost:3000/checkforexistinguser', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
