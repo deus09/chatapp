@@ -18,7 +18,7 @@ export default class Home extends React.Component {
   async loadCredentials() {
     const phonenumber = await AsyncStorage.getItem('phonenumber');
     this.setState({ phonenumber: phonenumber });
-    const response = await fetch('http://13.233.7.44/getfriends', {
+    const response = await fetch('http://localhost:3000/getfriends', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
